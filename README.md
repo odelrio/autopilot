@@ -31,6 +31,7 @@ The engine never names a provider. Your config resolves these:
 
 | Component               | Invocation            | Role                                                       |
 | ----------------------- | --------------------- | ---------------------------------------------------------- |
+| `commands/init.md`      | `/autopilot:init`     | Scaffold your `roadmap.config.md` (the one interactive command). |
 | `commands/solo.md`      | `/autopilot:solo`     | Single-agent: works the queue one item at a time.          |
 | `commands/fleet.md`     | `/autopilot:fleet`    | Orchestrator: lanes, worktree subagents, serial merge queue.|
 | `skills/task/`          | `autopilot:task`      | One roadmap item end-to-end.                               |
@@ -47,21 +48,105 @@ From the marketplace:
 /plugin install autopilot@autopilot
 ```
 
-For local development (run from the repo root), load it directly without installing:
+Confirm it loaded: `/help` should list `/autopilot:init`, `/autopilot:solo`, and
+`/autopilot:fleet`.
 
+> Developing the plugin itself? Run it from a clone without installing: `claude --plugin-dir .`
+> from the repo root.
+
+## Quickstart
+
+1. **Scaffold your config.** From your repository root:
+
+   ```
+   /autopilot:init
+   ```
+
+   It autodetects what your repo already reveals — code host (GitHub/GitLab), build gate,
+   base branch, likely canonical docs — shows you what it found, lets you correct anything,
+   then writes `roadmap.config.md` (and a starter `ROADMAP.md` if you pick the Markdown
+   checklist source). `init` is the **only** autopilot command that asks you questions;
+   `solo` and `fleet` never do. It won't overwrite an existing `roadmap.config.md`.
+
+2. **Fill the TODOs it leaves.** A few sections only you can supply — chiefly `## Queue`
+   (your dependency-ordered work and the fleet's lane surfaces), `## Reserved decisions`, and
+   the optional `## Spec gate`. See `docs/config-schema.md` for what each section means.
+
+3. **Run.**
+   - **Single agent:** `/autopilot:solo` — works the queue one item at a time, posting one
+     line per item, until a stop condition.
+   - **Parallel:** `/autopilot:fleet` — claims one item per lane, spawns a worktree subagent
+     for each, and merges through a strictly-serial queue.
+   - **Unattended to completion:** launch either on a loop. It ends itself at mission
+     complete and does not reschedule.
+
+## Dry run (optional but recommended)
+
+Before an unattended session, sanity-check selection with the lightest binding. Put a
+`ROADMAP.md` checklist in a scratch directory (the shape is in `examples/bindings/markdown.md`)
+and ask the agent to resolve `next-ready` — it should pick the first unchecked item whose
+dependencies are all checked, touching no tracker or code host. This is the engine's
+agnosticism in isolation: dependency-gated selection with zero provider coupling.
+
+## Stop conditions (it's not a daemon)
+
+A run stops on its own. It ends at **mission complete** (only externally-blocked or reserved
+work remains), at a **session boundary** (context degraded — it writes a resume digest and
+picks up next time from the roadmap source), or on a **safety** trip (repeated failed gates).
+Full definitions live in `autopilot:standards` §9.
+
+## Where the rules live
+
+The fixed discipline — survival rules, the merge protocol, crash recovery, the communication
+contract — is in the `autopilot:standards` skill, not in your config. Your config supplies only
+project specifics. You can override a specific standard by saying so explicitly in the config,
+but the defaults are what keep long runs alive — change them deliberately.
+
+## Optional: enforce some checks with hooks
+
+The `autopilot:standards` rules are instructions the agent follows. Most are **judgment**
+calls — circuit-breaking a flaky provider, telling an environmental failure from a real one,
+deciding under ambiguity — and cannot be mechanized; they stay as prose. But a few are
+**mechanical** (a binary pass/fail) and benefit from deterministic enforcement via Claude Code
+hooks.
+
+Those hooks do **not** live in this engine. A hook is a shell command bound to a real tool
+(`git`, `gh`), and baking tool names into the engine would break the very abstraction the verb
+contract protects. They belong in **your** repository's `.claude/settings.json`, alongside
+your bindings — the project layer that already knows your tools. Good candidates, all straight
+from the standards:
+
+- **`PreToolUse`** before your `verify` command → block if `git branch --show-current` is the
+  base branch, so a silently-failed checkout can't "pass" the gate on the base (§5).
+- **`PostToolUse`** after your `push` command → assert the remote tip equals the local tip, so
+  a rejected push followed by a squash-merge can't silently drop commits (§1).
+- **`Stop` / `SubagentStop`** → sweep for orphaned processes (§2), or flag a final message that
+  is raw review text instead of the report (§4).
+
+```jsonc
+// .claude/settings.json — in YOUR project, not in this plugin.
+// Illustrative: refuse to run the verify gate while on the base branch (standards §5).
+{
+  "hooks": {
+    "PreToolUse": [{
+      "matcher": "Bash",
+      "hooks": [{
+        "type": "command",
+        "command": ".claude/hooks/guard-gate.sh"  // reads the tool call on stdin; exit 2 blocks
+      }]
+    }]
+  }
+}
 ```
-claude --plugin-dir .
-```
 
-Then drop a `roadmap.config.md` at your repository root (start from
-`examples/roadmap.config.example.md`) and run `/autopilot:solo` — or `/autopilot:fleet` for
-parallel execution. To run the doable roadmap to completion unattended, launch the command on
-a loop; it ends itself at mission complete.
+Rule of thumb: hook only the checks whose outcome is binary, and keep the judgment rules as
+prose. A hook that needs judgment will fire wrong and train the agent to ignore it.
 
-## Writing your config
+## Config reference
 
-See **`docs/getting-started.md`** for the walkthrough and **`docs/config-schema.md`** for the
-full schema. The `examples/bindings/` directory has ready-made bindings:
+`/autopilot:init` is the fastest way to produce `roadmap.config.md`. To write or tune it by
+hand, see **`docs/config-schema.md`** for the full schema and the verb contract. The
+`examples/bindings/` directory has ready-made bindings:
 
 - Source: `jira.md` (`acli`), `github-issues.md` (`gh`), `markdown.md` (a checklist, no
   tracker).

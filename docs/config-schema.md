@@ -8,6 +8,10 @@ The engine reads this file at the start of every run. Anything the engine needs 
 specific to your project lives here — and **only** here. Keep tool names (`gh`, `acli`,
 `glab`, `make`, …) out of the engine; they belong in this file.
 
+> The fastest way to produce this file is **`/autopilot:init`**, which autodetects your stack
+> and writes most of it for you. This document explains every section so you can edit it — or
+> write it from scratch — by hand.
+
 ## The verb contract
 
 The engine never names a provider. It emits these verbs, and your bindings resolve them.
