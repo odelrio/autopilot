@@ -1,0 +1,16 @@
+# macOS
+.DS_Store
+
+# Editor / IDE cruft
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# Claude Code machine-local settings (committed counterpart: .claude/settings.json)
+.claude/settings.local.json
+
+# Captured gate/run output — the standards have agents write verify output to a file
+# (autopilot:standards §1), e.g. `cmd > run.log 2>&1`. Never commit those.
+*.log

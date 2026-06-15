@@ -1,0 +1,15 @@
+{
+  "name": "autopilot",
+  "description": "Generic engine for autonomous roadmap execution — single-agent and parallel-fleet orchestration with a serial merge queue.",
+  "owner": {
+    "name": "Oriol del Rio",
+    "email": "contact@odelrio.com"
+  },
+  "plugins": [
+    {
+      "name": "autopilot",
+      "source": "./",
+      "description": "Generic engine for autonomous roadmap execution."
+    }
+  ]
+}
