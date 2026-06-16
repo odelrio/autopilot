@@ -238,7 +238,7 @@ place, freshly written or pre-existing. Reuse the base for everything project-wi
    create `integration/<id>` from the detected base branch (§4), and `git push -u origin
    integration/<id>`. This is the **only** push `plan` performs — the scaffold commit itself stays
    unpushed (§11). On the mainline target, do nothing here.
-   <!-- ponytail: one setup push only in integration mode; if a sandbox ever forbids push, move
+   <!-- NOTE: one setup push only, in integration mode; if a sandbox ever forbids push, move
         branch creation into the binding's `branch` verb (create-if-absent) instead. -->
 8. **Commit the scaffold** (§11), then **report** per §9.
 
