@@ -26,6 +26,12 @@ file. A consumer hit two symptoms of this assumption:
 
 ## Non-goals (YAGNI for now)
 
+> **Superseded (2026-06-16, v0.5.0).** The first bullet below no longer holds. Two epics may now
+> run concurrently: the session guard became **per-roadmap** (not repo-global), and each
+> concurrently-run roadmap targets its own **integration branch** so the serial merge queues
+> never share a branch. See `docs/config-schema.md` → *Concurrent roadmaps and integration
+> branches* and `autopilot:standards` §10–§11.
+
 - Running **two epics in parallel simultaneously** with `fleet`. Each `fleet <ID>` still
   parallelizes lanes *within* one epic. Launching two epics at once shares the base branch and
   the serial merge queue, so it is documented as a known limitation, not solved here.

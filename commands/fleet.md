@@ -27,13 +27,21 @@ run one lane — degrading to sequential is correct; never force parallelism.
 
 ## Claim protocol
 
-- Never run two fleets/solos at once **anywhere in this repository** — this guard is
-  repo-global, not per-epic. With overlays the per-epic source logs differ, so do **not** anchor
-  the marker to the overlay's source; anchor it to a repository-level marker the **base**
-  defines (e.g. a marker on the base's code-host or a repo-level lock the base names), check it
-  before starting, post one when starting, and close it in the digest. Two different epics
-  running at once would share the base branch and this serial merge queue — the marker exists to
-  prevent exactly that.
+- Never run two fleets/solos at once **on the same roadmap** — this guard is **per-roadmap**,
+  not repo-global. Anchor the marker to **this roadmap's own source** (the overlay's source log
+  when an overlay is active, the base's log otherwise), check it before starting, post one when
+  starting, and close it in the digest. Two agents driving **different** roadmaps may run
+  concurrently — that is supported, not blocked; do **not** anchor the marker to a shared
+  repository-level lock that would serialize unrelated roadmaps. (Running two roadmaps inside one
+  invocation stays out of scope — see the one-epic-per-invocation rule above.)
+- **Concurrent roadmaps run on their own integration branch.** When the effective config gives
+  this roadmap an integration branch (its `## Code-host binding` points `branch`/`open-pr`/
+  `merge` at `integration/<ID>` instead of mainline), your serial merge queue operates **only on
+  that branch** — two concurrent fleets never share a branch and cannot collide. The isolation
+  is structural; you do not need to know what surfaces another roadmap touches. Keep the branch
+  fresh and reconcile it at the end as the *Merge queue* and *Stop conditions* sections say. A
+  roadmap with no integration branch targets mainline directly — then it is the only autopilot
+  run allowed to merge to mainline, which the per-roadmap marker already guarantees.
 - Per lane: `claim` the `next-ready` item whose dependencies are done and whose surface fits
   the lane. `claim` it (transition to in-progress) **before** spawning. Subagents never pick
   their own items.
@@ -78,6 +86,11 @@ Before blaming the environment for a flaky gate, sweep for orphaned processes
 (`autopilot:standards` §2) — a dead lane agent's leftovers can starve every gate. Sweep
 whenever a lane drains.
 
+When this roadmap runs on an integration branch, the queue's rebase target **is** that branch,
+never mainline. Keep it fresh: whenever a lane drains, merge mainline **forward** into the
+integration branch (the binding's equivalent of `git merge origin/<mainline>`) and re-run
+`verify` after any conflict, so the eventual `reconcile` stays small.
+
 You inherit `/autopilot:solo`'s **drift check** (queue vs source) at the start of the run;
 re-run it whenever a lane drains, alongside the orphan-process sweep, so work added to the
 source mid-session surfaces in the digest. It stays detect-and-report only — never auto-claim or
@@ -104,10 +117,13 @@ external wall or a reserved decision. Bounded by the roadmap, not a timer.
 ## Stop conditions
 
 Per `autopilot:standards` §9, adapted for the fleet: **mission complete** → drain in-flight
-lanes, finish the merge queue, write the final digest, close the session marker, end (on a
-loop, do not reschedule) · **session boundary** → stop spawning, drain lanes (no refills),
-finish the queue, write a resume digest, close the marker, stop · **safety** → two consecutive
-parked PRs in the merge queue → drain and stop.
+lanes, finish the merge queue, **`reconcile` the integration branch into mainline if this
+roadmap uses one** (full `verify` gate + conflict protocol; if it conflicts irreducibly, `park`
+the reconcile with a note and report rather than forcing), write the final digest, close the
+session marker, end (on a loop, do not reschedule) · **session boundary** → stop spawning, drain
+lanes (no refills), finish the queue, **do not reconcile** (the roadmap is unfinished — leave the
+integration branch open), write a resume digest, close the marker, stop · **safety** → two
+consecutive parked PRs in the merge queue → drain and stop.
 
 ## Output contract
 

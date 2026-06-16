@@ -23,4 +23,8 @@ Dependency order comes from the `## Queue` in `roadmap.config.md`, not from GitH
   unnoticed.
 - Use a label (e.g. `in-progress`) plus self-assignment as the `claim` signal so a parallel
   fleet can see what is taken.
+- The **per-roadmap** session marker (one solo/fleet run per roadmap at a time) is a marker
+  comment on the tracking issue `<TRACK>` (`FLEET-SESSION open`/`closed`), or a label on it:
+  check it before starting, post on start, close in the digest. Anchored to this roadmap's
+  tracking issue, so a different roadmap's run is unaffected.
 - Bodies are plain Markdown — no format conversion needed.
