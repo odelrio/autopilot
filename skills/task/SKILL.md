@@ -7,9 +7,15 @@ description: Execute one roadmap item end-to-end — claim, optional spec gate, 
 
 One invocation = one roadmap item, end to end. Load **`autopilot:standards`** first — it
 holds the survival rules, the merge protocol, and the communication contract, and this skill
-does not restate them. Read the project's **`roadmap.config.md`** for every binding,
-command, and convention referenced below; resolve each verb (`claim`, `verify`, `push`,
-`merge`, …) through that file.
+does not restate them. Read the project's **effective config** for every binding, command, and
+convention referenced below — that is the base `roadmap.config.md` composed with the active
+`roadmaps/<ID>.md` overlay (the caller, `/autopilot:solo` or `/autopilot:fleet`, resolves which
+overlay; section-level override, overlay wins). Resolve each verb (`claim`, `verify`, `push`,
+`merge`, …) through it; the `## Source binding` and `## Queue` you act on come from the overlay
+when one is active, everything else from the base. The caller resolves the overlay **in the same
+session** before invoking this skill, so the effective config is already in context — there is
+no on-disk "active roadmap" pointer to read (the engine keeps no such state; selection is the
+caller's `<ID>` argument plus the single-overlay default).
 
 If no `roadmap.config.md` exists, stop and say so — the engine has nothing to bind to.
 
