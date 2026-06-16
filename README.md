@@ -105,14 +105,18 @@ your source to `init` in plain language and it writes the matching binding.
 - **A product checklist** — *"My roadmap is the checklist in `PRODUCT.md`."* The lightest
   source: no tracker, items are `- [ ]` lines. → see `examples/bindings/markdown.md`.
 
-**Scaffold an epic overlay** (when one repo carries several roadmaps):
+**Scaffold an epic overlay** (when one repo carries several roadmaps) — by ticket **or** by
+intent when there is none:
 
 ```
-/autopilot:init TICKET-101
+/autopilot:init TICKET-101                    # tracker key → roadmaps/TICKET-101.md
+/autopilot:init redesign the onboarding flow  # no ticket   → roadmaps/onboarding-redesign.md
 ```
 
-*"Set up an overlay for epic TICKET-101 — it has its own queue and Jira source, but inherits
-the project's verify gate and review ritual from the base config."*
+*"Set up an overlay for epic TICKET-101 — its own queue and Jira source, inheriting the verify
+gate and review ritual from the base."* · *"Start a roadmap for the onboarding redesign — no
+ticket, derive the name from this."* `init` proposes the resolved id (a tracker key verbatim, or
+a kebab-case slug distilled from your free text or the conversation) and confirms before writing.
 
 **Run a roadmap:**
 
@@ -137,8 +141,11 @@ a shared **base** and per-epic **overlays**:
   optional overrides). The effective config is base + overlay, section-level override.
 
 Scaffold a new epic with `/autopilot:init TICKET-101`, then run it with `/autopilot:solo TICKET-101`
-or `/autopilot:fleet TICKET-101`. With no `roadmaps/` directory the root file is simply the single
-roadmap, exactly as before — overlays are additive. Full rules:
+or `/autopilot:fleet TICKET-101`. The id need **not** be a ticket: with no tracker key, `init`
+derives a kebab-case slug from your free-text intent or the conversation (e.g. `redesign onboarding`
+→ `roadmaps/onboarding-redesign.md`), confirming it first; that slug then also groups the
+roadmap's branches as `<type>/<roadmap-slug>/<item-slug>`. With no `roadmaps/` directory the root
+file is simply the single roadmap, exactly as before — overlays are additive. Full rules:
 `docs/config-schema.md` → *One roadmap or several*. One epic runs per `solo`/`fleet` invocation.
 
 Two roadmaps may run **at the same time** (two agents, one epic each — a per-roadmap session

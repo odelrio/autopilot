@@ -60,7 +60,8 @@ On every PR, in order, each posted via `comment-pr` *before* any prose:
 
 ## Conventions
 
-- Branch: `feat/ACME-1-summary`, `fix/…`, `chore/…`, `refactor/…`.
+- Branch: tracker-backed → `feat/ACME-1-summary` (`fix/…`, `chore/…`, `refactor/…`); slug-named
+  roadmap (no tracker) → `feat/<roadmap-slug>/<item-slug>`.
 - Commit & PR title: `feat(ACME-1): description`.
 - PR body uses the repo's template; link the work item in the footer.
 - No AI-tooling mentions or co-author attribution in any artifact. All artifacts in English.
