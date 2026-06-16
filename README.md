@@ -67,7 +67,7 @@ Confirm it loaded: `/help` should list `/autopilot:init`, `/autopilot:solo`, and
    then writes `roadmap.config.md` (and a starter `ROADMAP.md` if you pick the Markdown
    checklist source). `init` is the **only** autopilot command that asks you questions;
    `solo` and `fleet` never do. It won't overwrite an existing `roadmap.config.md` — and
-   `/autopilot:init BRU-101` instead scaffolds an epic overlay (see *Multiple roadmaps* below).
+   `/autopilot:init TICKET-101` instead scaffolds an epic overlay (see *Multiple roadmaps* below).
 
 2. **Fill the TODOs it leaves.** A few sections only you can supply — chiefly `## Queue`
    (your dependency-ordered work and the fleet's lane surfaces), `## Reserved decisions`, and
@@ -81,6 +81,51 @@ Confirm it loaded: `/help` should list `/autopilot:init`, `/autopilot:solo`, and
    - **Unattended to completion:** launch either on a loop. It ends itself at mission
      complete and does not reschedule.
 
+## Example prompts
+
+Autopilot is driven by three slash commands. What changes between projects is the **roadmap
+source** — where your work items live — which `init` captures in `## Source binding`. Describe
+your source to `init` in plain language and it writes the matching binding.
+
+**Scaffold the config (run once):**
+
+```
+/autopilot:init
+```
+
+…then tell it where work lives. A few sources, from heaviest to lightest:
+
+- **Jira** — *"Work items are subtasks of Jira epic TICKET-101, driven through `acli`; the
+  epic's comments are the decision log."* → see `examples/bindings/jira.md`.
+- **GitHub Issues** — *"Work items are issues labeled `roadmap`; the tracking issue is the
+  log."* → see `examples/bindings/github-issues.md`.
+- **Spec files (openspec-style)** — *"My roadmap is the change specs under `openspec/changes/` —
+  each change folder is one item, `done` when its tasks are checked."* Resolves like the
+  Markdown source, scanning a directory instead of a single file.
+- **A product checklist** — *"My roadmap is the checklist in `PRODUCT.md`."* The lightest
+  source: no tracker, items are `- [ ]` lines. → see `examples/bindings/markdown.md`.
+
+**Scaffold an epic overlay** (when one repo carries several roadmaps):
+
+```
+/autopilot:init TICKET-101
+```
+
+*"Set up an overlay for epic TICKET-101 — it has its own queue and Jira source, but inherits
+the project's verify gate and review ritual from the base config."*
+
+**Run a roadmap:**
+
+```
+/autopilot:solo               # single roadmap, one item at a time
+/autopilot:solo TICKET-101    # a specific epic overlay
+/autopilot:fleet TICKET-101   # parallel lanes + strictly-serial merge queue
+```
+
+*"Run the PRODUCT.md roadmap solo until you hit something blocked or reserved."* ·
+*"Fleet the TICKET-101 epic — parallelize the backend and frontend lanes."* Launch either on a
+loop to run unattended to completion.
+
 ## Multiple roadmaps in one repo
 
 One repo can run several independent roadmaps (one per initiative/epic). The config splits into
@@ -91,8 +136,8 @@ a shared **base** and per-epic **overlays**:
 - `roadmaps/<ID>.md` — an epic overlay: that epic's `## Source binding` and `## Queue` (plus
   optional overrides). The effective config is base + overlay, section-level override.
 
-Scaffold a new epic with `/autopilot:init BRU-101`, then run it with `/autopilot:solo BRU-101`
-or `/autopilot:fleet BRU-101`. With no `roadmaps/` directory the root file is simply the single
+Scaffold a new epic with `/autopilot:init TICKET-101`, then run it with `/autopilot:solo TICKET-101`
+or `/autopilot:fleet TICKET-101`. With no `roadmaps/` directory the root file is simply the single
 roadmap, exactly as before — overlays are additive. Full rules:
 `docs/config-schema.md` → *One roadmap or several*. One epic runs per `solo`/`fleet` invocation.
 
