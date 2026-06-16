@@ -13,7 +13,7 @@ This skill has **two modes**, chosen by what already exists and whether you were
 
 - **Base mode** — no `roadmap.config.md` yet: scaffold the project base (§§1–9 below).
 - **Overlay mode** — a base already exists **and** you were invoked with an id
-  (`/autopilot:init BRU-101`): scaffold a new epic overlay `roadmaps/<ID>.md` instead of
+  (`/autopilot:init TICKET-101`): scaffold a new epic overlay `roadmaps/<ID>.md` instead of
   stopping (§10). A base existing with **no** id still stops and reports (§0), so a bare
   re-run never regenerates the base by surprise.
 
@@ -46,7 +46,7 @@ The files you read (sources of truth — never edit them, only copy from them):
 
 - Must be inside a git work tree (`git rev-parse --is-inside-work-tree`). If not, stop and say so.
 - Existing `roadmap.config.md` at the repo root decides the mode:
-  - invoked **with an id** (`/autopilot:init BRU-101`) → **overlay mode**, jump to §10 (do not
+  - invoked **with an id** (`/autopilot:init TICKET-101`) → **overlay mode**, jump to §10 (do not
     touch the base).
   - invoked **with no id** → **stop and report** — do not overwrite. Only regenerate the base
     if the user explicitly asks; even then, show what you'd change first.
@@ -139,7 +139,7 @@ schema of every section.
 You were invoked as `/autopilot:init <ID>` with a `roadmap.config.md` already present. Scaffold
 an **epic overlay**, reusing the base for everything project-wide. Do not edit the base.
 
-1. **Resolve `<ID>`** from the argument (e.g. `BRU-101`); the overlay path is `roadmaps/<ID>.md`.
+1. **Resolve `<ID>`** from the argument (e.g. `TICKET-101`); the overlay path is `roadmaps/<ID>.md`.
    If it already exists, **stop and report** — never overwrite an overlay (same rule as the base).
 2. **Read the base** `roadmap.config.md` to confirm the shared sections (`## Code-host binding`,
    `## Verify`, `## Review ritual`, `## Conventions`) the overlay will inherit. The overlay does
@@ -150,7 +150,7 @@ an **epic overlay**, reusing the base for everything project-wide. Do not edit t
 4. **Confirm** (the `init` "+ confirm"): show the id, the overlay path, the chosen source, and
    that host/verify/review/conventions are inherited from the base. Do not write until confirmed.
 5. **Write `roadmaps/<ID>.md`** with only the overlay sections, following
-   `examples/roadmaps/BRU-101.md`:
+   `examples/roadmaps/TICKET-101.md`:
    - `## Source binding` — paste the chosen source binding's verb table verbatim, substituting
      this epic's ids.
    - `## Queue` — a `<!-- TODO: dependency-ordered work for <ID> + fleet lane surfaces -->`

@@ -75,7 +75,7 @@ Consumers drop a `roadmap.config.md` at their repo root. Start from
 epic adds an overlay `roadmaps/<ID>.md` with its own `## Source binding` and `## Queue`. The
 effective config is base ⊕ overlay (section-level override, overlay wins); `/autopilot:solo
 <ID>` / `/autopilot:fleet <ID>` select the epic. With no `roadmaps/`, the root file is the
-single roadmap. Start from `examples/roadmaps/BRU-101.md`; full rules in
+single roadmap. Start from `examples/roadmaps/TICKET-101.md`; full rules in
 `docs/config-schema.md` → *One roadmap or several*. Two roadmaps may run **concurrently** (one
 agent each; a per-roadmap session marker blocks two runs on the same roadmap) — give each its own
 **integration branch** so their serial merge queues never share a branch, with a single

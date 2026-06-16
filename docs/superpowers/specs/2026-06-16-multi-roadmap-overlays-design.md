@@ -9,11 +9,11 @@ Autopilot assumes a single `roadmap.config.md` at the repo root. The whole runti
 (`solo`, `fleet`, `task`, `standards`), plus `init` and the docs, are written around that one
 file. A consumer hit two symptoms of this assumption:
 
-1. `/autopilot:init Vamos a trabajar en BRU-101` refused to do anything because
+1. `/autopilot:init Vamos a trabajar en TICKET-101` refused to do anything because
    `roadmap.config.md` already existed (the init contract stops rather than overwrite), and had
-   no way to act on the "work on BRU-101" intent.
+   no way to act on the "work on TICKET-101" intent.
 2. The underlying need: **a single repository should host several independent roadmaps** — one
-   per initiative/epic (e.g. `BRU-101`), each with its own queue and source binding, runnable
+   per initiative/epic (e.g. `TICKET-101`), each with its own queue and source binding, runnable
    one at a time.
 
 ## Goals
@@ -60,7 +60,7 @@ Two kinds of file, composed at runtime:
   - `## Reserved decisions`
   - optionally overrides `## Canonical docs`, `## Spec gate`, `## Conventions`
 
-`<ID>` (e.g. `BRU-101`) is simultaneously the overlay filename stem and the argument passed to
+`<ID>` (e.g. `TICKET-101`) is simultaneously the overlay filename stem and the argument passed to
 `solo`/`fleet`/`init`. Filenames use `.md` (not `.config.md`) to distinguish overlays from the
 base.
 
@@ -107,8 +107,8 @@ config does today.
 - `/autopilot:init` with no ID and a base present → keep the current stop-and-report (no
   unintended base regeneration).
 
-This directly resolves the reported bug: "Vamos a trabajar en BRU-101" becomes "I'll scaffold
-the BRU-101 overlay."
+This directly resolves the reported bug: "Vamos a trabajar en TICKET-101" becomes "I'll scaffold
+the TICKET-101 overlay."
 
 ## Files to change
 

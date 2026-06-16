@@ -25,7 +25,7 @@ initiative/epic). The config splits accordingly:
   `## Reserved decisions`, and optional overrides of `## Canonical docs`, `## Spec gate`,
   `## Conventions`, and — when the roadmap runs concurrently on its own integration branch —
   `## Code-host binding` (to retarget `branch`/`open-pr`/`merge` at that branch; see *Concurrent
-  roadmaps and integration branches* below). `<ID>` (e.g. `BRU-101`) is both the filename stem and the argument you pass
+  roadmaps and integration branches* below). `<ID>` (e.g. `TICKET-101`) is both the filename stem and the argument you pass
   to `/autopilot:solo`, `/autopilot:fleet`, and `/autopilot:init`. When the overlay's source is
   the Markdown checklist (no tracker), that epic's checklist lives beside it at
   `roadmaps/<ID>.ROADMAP.md` — the per-epic counterpart of a single-roadmap repo's root
@@ -188,4 +188,4 @@ This keeps `solo`/`fleet` non-interactive: an ambiguous launch fails fast with t
 the same way a missing config does.
 
 Start from `examples/roadmap.config.example.md` (single-roadmap base) and, for a multi-roadmap
-repo, `examples/roadmaps/BRU-101.md` (overlay). Replace each binding with your project's tools.
+repo, `examples/roadmaps/TICKET-101.md` (overlay). Replace each binding with your project's tools.
