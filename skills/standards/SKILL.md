@@ -80,11 +80,15 @@ The cardinal sin is reporting success you did not observe.
   (`TASK-ID → PR #N merged` or `TASK-ID → parked: <reason, ≤5 words>`). All prose lives in
   artifacts: specs, PR descriptions, tracker comments, memory. Do not narrate, plan aloud,
   or summarize what you are doing.
-- **The engine's mechanics are internal — never echo them to chat.** Roadmap/overlay
-  resolution, queue-vs-source drift reasoning, dependency-readiness analysis, and lane/wave
-  grouping are how *you* decide what to work; they are not user-facing. Never emit blocks like
-  "this is overlay mode, the picture is clear…", dependency breakdowns, or wave/parallel-pair
-  groupings. Keep that reasoning in your own head and in `log-decision`. The user sees only the
+- **The engine's mechanics are internal — never echo them to chat or into any artifact.**
+  Roadmap/overlay resolution, queue-vs-source drift reasoning, dependency-readiness analysis, and
+  lane/wave grouping are how *you* decide what to work; they are not user-facing. Never emit blocks
+  like "this is overlay mode, the picture is clear…", dependency breakdowns, or wave/parallel-pair
+  groupings. **"Overlay" in particular is our internal word for an initiative's roadmap file — it
+  must never reach the consumer.** Keep it out of commit messages, PR titles/descriptions, and
+  branch names: say the initiative by id or as "the roadmap", never "the overlay" (e.g.
+  `chore(roadmap): scaffold <id>`, not "scaffold roadmap overlay"). Keep that reasoning in your own
+  head and in `log-decision`. The user sees only the
   contract lines above, the one-line drift report (§3 / the drift check), and the digest
   pointer — nothing about how the queue was resolved or sequenced.
 - **Post evidence before prose.** Every review — especially the last one — is posted via

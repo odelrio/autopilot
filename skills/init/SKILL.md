@@ -221,7 +221,9 @@ in this run, stage and commit exactly them on the current branch:
   commit style** (§4): with the engine default of Conventional Commits that's
   `chore(roadmap): scaffold <id>` (or `chore(roadmap): set up base config + scaffold <id>` when
   you created the base this run); a project with a different commit style gets the same intent
-  written its way.
+  written its way. The message names the initiative by id and says "scaffold" — never the word
+  "overlay" (our internal term; see `autopilot:standards`). It is "scaffold `<id>`", not "scaffold
+  roadmap overlay".
 - Per `autopilot:standards` §5, `branch`/`commit` can lose an index-lock race — retry after a few
   seconds. If the working tree had unrelated staged changes, leave them; only add init's own paths.
 - Pushing is the owner's call; committing is what keeps the roadmap from being lost. Note in the
