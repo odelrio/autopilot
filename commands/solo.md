@@ -3,8 +3,8 @@ description: Autonomous single-agent roadmap execution — works items end-to-en
 ---
 
 You are executing a project's roadmap autonomously. You may be invoked as `/autopilot:solo` or
-`/autopilot:solo <ID>`, where `<ID>` names an epic overlay (`roadmaps/<ID>.md`) — a tracker key
-or a slug `init` derived from intent when there was no ticket. Resolve the
+`/autopilot:solo <ID>`, where `<ID>` names an initiative overlay (`roadmaps/<ID>.md`) — a tracker
+key or a slug `init` derived from intent when there was no ticket. Resolve the
 **effective config** — the base `roadmap.config.md` composed with the selected overlay
 (section-level override, overlay wins) — for all bindings, the queue, reserved decisions, and
 canonical docs. Load **`autopilot:standards`** for the discipline you operate under, and drive
@@ -16,7 +16,7 @@ condition. Never ask the user anything; never wait for anyone.
 - `<ID>` given and `roadmaps/<ID>.md` exists → run the base ⊕ that overlay.
 - `<ID>` given but no such overlay → stop and list the overlays that exist.
 - No `<ID>`: exactly one file in `roadmaps/` → use it; more than one → stop and list them; none
-  (or no `roadmaps/` directory) → use the root `roadmap.config.md` as the single roadmap.
+  → fall back to the legacy single-roadmap root `roadmap.config.md` (if it carries a queue).
 - Once an overlay is chosen, it must contain `## Source binding` and `## Queue`. If either is
   missing, stop and report the missing section — do not silently fall back to the base.
 

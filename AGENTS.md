@@ -26,7 +26,7 @@ The engine is **project-agnostic**. It speaks abstract verbs only; a consuming p
 ```
 Engine (this plugin)      commands/solo · commands/fleet · skills/task · skills/standards
    │  speaks abstract verbs only
-Project config            roadmap.config.md (base)  +  roadmaps/<ID>.md (per-epic overlays)
+Project config            roadmap.config.md (base plumbing)  +  roadmaps/<id>.md (one per initiative)
    │  resolves verbs → real tools; effective config = base ⊕ overlay (overlay wins)
 Your repository           the roadmap actually gets executed
 ```
@@ -70,19 +70,18 @@ Consumers drop a `roadmap.config.md` at their repo root. Start from
 `## Reserved decisions`, `## Queue`, `## Canonical docs`. Optional: `## Spec gate`,
 `## Environment gotchas`.
 
-**Multiple roadmaps:** one repo may run several epic-scoped roadmaps. The root
-`roadmap.config.md` holds the project-wide sections (host, verify, review, conventions); each
-epic adds an overlay `roadmaps/<ID>.md` with its own `## Source binding` and `## Queue`. The
-effective config is base ⊕ overlay (section-level override, overlay wins); `/autopilot:solo
-<ID>` / `/autopilot:fleet <ID>` select the epic. `<ID>` is a tracker key, or a kebab-case slug
+**Initiatives:** work is organized as initiatives — the normal unit. The base `roadmap.config.md`
+holds project-wide **plumbing** (host, verify, review, conventions) only; each initiative is an
+overlay `roadmaps/<id>.md` with its own `## Source binding` and `## Queue`. The effective config
+is base ⊕ overlay (section-level override, overlay wins); `/autopilot:solo <id>` /
+`/autopilot:fleet <id>` select the initiative. `<id>` is a tracker key, or a kebab-case slug
 `init` derives from free-text intent / the conversation when there is no ticket (confirmed before
-writing). With no `roadmaps/`, the root file is the single roadmap. Start from
-`examples/roadmaps/TICKET-101.md`; full rules in
-`docs/config-schema.md` → *One roadmap or several*. Two roadmaps may run **concurrently** (one
-agent each; a per-roadmap session marker blocks two runs on the same roadmap) — give each its own
-**integration branch** so their serial merge queues never share a branch, with a single
-`reconcile` to mainline at epic completion (`docs/config-schema.md` → *Concurrent roadmaps and
-integration branches*).
+writing). Start from `examples/roadmaps/TICKET-101.md`; full rules in `docs/config-schema.md` →
+*The model*. (Legacy: a root config carrying its own source + queue still runs as a single
+roadmap.) Two initiatives may run **concurrently** (one agent each; a per-roadmap session marker
+blocks two runs on the same initiative) — give each its own **integration branch** so their serial
+merge queues never share a branch, with a single `reconcile` to mainline at completion
+(`docs/config-schema.md` → *Concurrent roadmaps and integration branches*).
 
 Pre-built binding snippets live in `examples/bindings/` — paste and adjust:
 - **Source:** `jira.md` (`acli`), `github-issues.md` (`gh`), `markdown.md` (checklist, no tracker)
@@ -102,9 +101,10 @@ Pre-built binding snippets live in `examples/bindings/` — paste and adjust:
   is load-bearing: fleet subagents do **not** merge — they stop after PR open and triage; the
   orchestrator's serial merge queue handles everything else.
 - The base ⊕ overlay split is section-level override, never a deep merge: an overlay section
-  replaces the base section of the same name. `## Source binding` and `## Queue` belong to the
-  overlay; host/verify/review/conventions belong to the base. Keep `docs/config-schema.md` →
-  *One roadmap or several* as the authority and don't restate the resolution rules elsewhere.
+  replaces the base section of the same name. The base is **plumbing only** — `## Source binding`
+  and `## Queue` belong to the initiative overlay; host/verify/review/conventions to the base.
+  Keep `docs/config-schema.md` → *The model* as the authority and don't restate the resolution
+  rules elsewhere.
 - The user-facing walkthrough is `README.md`; the deep schema reference is
   `docs/config-schema.md`. When you change a section name or the verb contract, update
   `docs/config-schema.md` in the same change — it is the schema of record for consumer configs.

@@ -7,8 +7,8 @@ description: The discipline layer for autonomous roadmap execution — survival 
 
 These are the rules that keep an autonomous agent alive and trustworthy. They are
 **project-agnostic**: they speak in the engine's abstract verbs, never in a specific
-tool. Your project's config binds the verbs to real commands — the base `roadmap.config.md`,
-composed with the active `roadmaps/<ID>.md` overlay when the repo runs more than one roadmap.
+tool. Your project's config binds the verbs to real commands — the base `roadmap.config.md`
+(plumbing), composed with the active initiative's `roadmaps/<id>.md` overlay (source + queue).
 Wherever a rule says `verify`, `push`, `merge`, `comment-pr`, etc., run the binding the
 effective config defines for that verb.
 

@@ -1,11 +1,11 @@
-# roadmaps/TICKET-101.md (example overlay)
+# roadmaps/TICKET-101.md (example initiative overlay)
 
-> An **epic overlay**. Drop overlays at `roadmaps/<ID>.md` in your repo root when one repo runs
-> several roadmaps. It carries only the epic-specific sections; everything project-wide
-> (`## Code-host binding`, `## Verify`, `## Review ritual`, `## Conventions`,
-> `## Environment gotchas`) is inherited from the base `roadmap.config.md`. Run this epic with
-> `/autopilot:solo TICKET-101` or `/autopilot:fleet TICKET-101`. See `docs/config-schema.md` →
-> *One roadmap or several*.
+> An **initiative overlay** — the normal unit of work. Each initiative is a `roadmaps/<id>.md`
+> carrying only its own sections (`## Source binding`, `## Queue`, `## Reserved decisions`);
+> everything project-wide (`## Code-host binding`, `## Verify`, `## Review ritual`,
+> `## Conventions`, `## Environment gotchas`) is inherited from the base `roadmap.config.md`. Run
+> it with `/autopilot:solo TICKET-101` or `/autopilot:fleet TICKET-101`. See
+> `docs/config-schema.md` → *The model*.
 
 ## Source binding
 

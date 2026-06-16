@@ -12,37 +12,40 @@ specific to your project lives here — and **only** here. Keep tool names (`gh`
 > and writes most of it for you. This document explains every section so you can edit it — or
 > write it from scratch — by hand.
 
-## One roadmap or several: base ⊕ overlay
+## The model: a base + initiative overlays
 
-A repository may run **one** roadmap or **several** independent ones (one per
-initiative/epic). The config splits accordingly:
+Work is organized as **initiatives**, and an initiative is the normal unit you run. The config
+splits in two:
 
-- **`roadmap.config.md` (repo root) — the project base.** Holds what every roadmap in the repo
-  shares: `## Code-host binding`, `## Verify`, `## Review ritual`, `## Conventions`,
-  `## Environment gotchas`, and a default `## Canonical docs`.
-- **`roadmaps/<ID>.md` — an epic overlay** *(optional)*. Holds what is specific to one
-  initiative: `## Source binding` and `## Queue` (both **required** in an overlay), plus
-  `## Reserved decisions`, and optional overrides of `## Canonical docs`, `## Spec gate`,
-  `## Conventions`, and — when the roadmap runs concurrently on its own integration branch —
-  `## Code-host binding` (to retarget `branch`/`open-pr`/`merge` at that branch; see *Concurrent
-  roadmaps and integration branches* below). `<ID>` (e.g. `TICKET-101`) is both the filename stem and the argument you pass
-  to `/autopilot:solo`, `/autopilot:fleet`, and `/autopilot:init`. It is a **tracker key** when one
-  exists, or a short **kebab-case slug** that `init` derives from your intent when there is no
-  ticket (`/autopilot:init redesign onboarding` → `roadmaps/onboarding-redesign.md`); `init`
-  always confirms the resolved id before writing. When the overlay's source is
-  the Markdown checklist (no tracker), that epic's checklist lives beside it at
-  `roadmaps/<ID>.ROADMAP.md` — the per-epic counterpart of a single-roadmap repo's root
-  `ROADMAP.md`.
+- **`roadmap.config.md` (repo root) — the project base.** Shared **plumbing** every initiative
+  reuses: `## Code-host binding`, `## Verify`, `## Review ritual`, `## Conventions`,
+  `## Environment gotchas`, a default `## Canonical docs`, and an optional project-wide
+  `## Spec gate`. It carries **no** `## Source binding` or `## Queue` — those are per-initiative.
+- **`roadmaps/<id>.md` — an initiative overlay.** Holds what is specific to one initiative:
+  `## Source binding` and `## Queue` (both **required**), plus `## Reserved decisions`, and
+  optional overrides of `## Canonical docs`, `## Spec gate`, `## Conventions`, and — when the
+  initiative runs concurrently on its own integration branch — `## Code-host binding` (to retarget
+  `branch`/`open-pr`/`merge` at that branch; see *Concurrent roadmaps and integration branches*
+  below). `<id>` is both the filename stem and the argument you pass to `/autopilot:solo`,
+  `/autopilot:fleet`, and `/autopilot:init`. It is a **tracker key** when one exists, or a short
+  **kebab-case slug** that `init` derives from your intent when there is no ticket
+  (`/autopilot:init redesign onboarding` → `roadmaps/onboarding-redesign.md`); `init` always
+  confirms the resolved id before writing. When the initiative's source is a file-based one
+  (Markdown checklist / spec files, no tracker), its checklist lives beside the overlay at
+  `roadmaps/<id>.ROADMAP.md`.
 
-**Composition is section-level override.** The *effective config* for a roadmap is the base,
-with each top-level `##` section present in the overlay **replacing** the base section of the
-same name. Sections only in the base are inherited; sections only in the overlay are added.
-This is a flat replace, not a deep merge — to know which value wins, ask only "is this section
-in the overlay?".
+A repo accumulates as many initiatives as it needs: `/autopilot:init` sets up the base **once**
+(reusing it thereafter) and scaffolds each initiative as an overlay.
 
-**Backward compatible.** With no `roadmaps/` directory, the root `roadmap.config.md` is itself
-the single roadmap and carries every section, exactly as before. Overlays are purely additive:
-adopt them only when a repo needs more than one roadmap.
+**Composition is section-level override.** The *effective config* for an initiative is the base,
+with each top-level `##` section present in the overlay **replacing** the base section of the same
+name. Sections only in the base are inherited; sections only in the overlay are added. A flat
+replace, not a deep merge — to know which value wins, ask only "is this section in the overlay?".
+
+**Backward compatible (legacy single roadmap).** A `roadmap.config.md` that itself carries
+`## Source binding` + `## Queue` (with no `roadmaps/` directory) still runs as a single roadmap —
+the engine reads it exactly as before. New setups scaffold initiatives as overlays; this legacy
+shape keeps existing configs working.
 
 ### Concurrent roadmaps and integration branches
 
@@ -92,11 +95,11 @@ The engine never names a provider. It emits these verbs, and your bindings resol
 ## Required sections of `roadmap.config.md`
 
 Write it as Markdown with these sections. Headings are conventional; the engine reads the
-content, so be explicit and literal — give exact commands, not descriptions of commands. In a
-single-roadmap repo all of them live in `roadmap.config.md`. In a multi-roadmap repo they split
-between the base and each overlay as described in **One roadmap or several** above —
-`## Source binding` and `## Queue` move into the overlay; the host/verify/review/conventions
-sections stay in the base.
+content, so be explicit and literal — give exact commands, not descriptions of commands. They
+split between the **base** (plumbing) and each **initiative overlay** as described in *The model*
+above: `## Source binding` and `## Queue` live in the overlay; the
+host/verify/review/conventions/canonical-docs sections stay in the base. (A legacy single-roadmap
+`roadmap.config.md` carries all of them in one file.)
 
 1. **`## Source binding`** — one resolution per roadmap-source verb. The concrete command or
    procedure for `next-ready`, `list-open`, `claim`, `complete`, `park`, `note`,
@@ -178,12 +181,12 @@ repo-wide lock — see each binding in `examples/bindings/` for where it lives.
 
 ### Selecting a roadmap
 
-`/autopilot:solo [ID]` and `/autopilot:fleet [ID]` resolve which roadmap to run:
+`/autopilot:solo [id]` and `/autopilot:fleet [id]` resolve which initiative to run:
 
-- **`ID` given, `roadmaps/<ID>.md` exists** → run base ⊕ that overlay.
-- **`ID` given, no such overlay** → stop and list the available overlays.
-- **No `ID`:** exactly one overlay in `roadmaps/` → use it; more than one → stop and list them;
-  none (or no `roadmaps/` directory) → use the root `roadmap.config.md` as the single roadmap.
+- **`id` given, `roadmaps/<id>.md` exists** → run base ⊕ that overlay.
+- **`id` given, no such overlay** → stop and list the available initiatives.
+- **No `id`:** exactly one overlay in `roadmaps/` → use it; more than one → stop and list them;
+  none → fall back to the legacy single-roadmap root `roadmap.config.md` (if it carries a queue).
 
 Once an overlay is selected, it **must** contain the required overlay sections (`## Source
 binding` and `## Queue`). If either is missing, that is a config error: stop and report which
@@ -192,5 +195,5 @@ section the overlay lacks rather than silently falling back to the base.
 This keeps `solo`/`fleet` non-interactive: an ambiguous launch fails fast with the valid IDs,
 the same way a missing config does.
 
-Start from `examples/roadmap.config.example.md` (single-roadmap base) and, for a multi-roadmap
-repo, `examples/roadmaps/TICKET-101.md` (overlay). Replace each binding with your project's tools.
+Start from `examples/roadmap.config.example.md` (the project base / plumbing) and
+`examples/roadmaps/TICKET-101.md` (an initiative overlay). Replace each binding with your tools.
