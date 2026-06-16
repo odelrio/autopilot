@@ -108,6 +108,10 @@ Replace with:
 - **No `ID`:** exactly one overlay in `roadmaps/` → use it; more than one → stop and list them;
   none (or no `roadmaps/` directory) → use the root `roadmap.config.md` as the single roadmap.
 
+Once an overlay is selected, it **must** contain the required overlay sections (`## Source
+binding` and `## Queue`). If either is missing, that is a config error: stop and report which
+section the overlay lacks rather than silently falling back to the base.
+
 This keeps `solo`/`fleet` non-interactive: an ambiguous launch fails fast with the valid IDs,
 the same way a missing config does.
 
@@ -214,7 +218,10 @@ convention referenced below — that is the base `roadmap.config.md` composed wi
 `roadmaps/<ID>.md` overlay (the caller, `/autopilot:solo` or `/autopilot:fleet`, resolves which
 overlay; section-level override, overlay wins). Resolve each verb (`claim`, `verify`, `push`,
 `merge`, …) through it; the `## Source binding` and `## Queue` you act on come from the overlay
-when one is active, everything else from the base.
+when one is active, everything else from the base. The caller resolves the overlay **in the same
+session** before invoking this skill, so the effective config is already in context — there is
+no on-disk "active roadmap" pointer to read (the engine keeps no such state; selection is the
+caller's `<ID>` argument plus the single-overlay default).
 
 If no `roadmap.config.md` exists, stop and say so — the engine has nothing to bind to.
 ```
@@ -270,6 +277,8 @@ condition. Never ask the user anything; never wait for anyone.
 - `<ID>` given but no such overlay → stop and list the overlays that exist.
 - No `<ID>`: exactly one file in `roadmaps/` → use it; more than one → stop and list them; none
   (or no `roadmaps/` directory) → use the root `roadmap.config.md` as the single roadmap.
+- Once an overlay is chosen, it must contain `## Source binding` and `## Queue`. If either is
+  missing, stop and report the missing section — do not silently fall back to the base.
 
 If no `roadmap.config.md` exists at all, stop and say so. Stopping to list overlays is not
 "asking the user" — it is the same fail-fast as a missing config; you still never prompt.
@@ -345,19 +354,44 @@ epic per invocation; running two epics at once is out of scope (they share the b
 the serial merge queue).
 ```
 
-- [ ] **Step 2: Verify.**
+- [ ] **Step 2: Make the session marker repo-global.**
+
+The Claim protocol's "Never run two fleets/solos at once" guard currently anchors the session
+marker to the source binding — which now lives in the overlay, so two *different* epics would no
+longer collide and could trample the shared base branch and serial merge queue. The guard must
+become **repo-global**: one autopilot session per repository, regardless of epic. Edit
+`old_string`:
+
+```
+- Never run two fleets/solos at once: check for an open session marker on the roadmap log
+  (the config's source binding defines it); post one when starting, close it in the digest.
+```
+
+Replace with:
+
+```
+- Never run two fleets/solos at once **anywhere in this repository** — this guard is
+  repo-global, not per-epic. With overlays the per-epic source logs differ, so do **not** anchor
+  the marker to the overlay's source; anchor it to a repository-level marker the **base**
+  defines (e.g. a marker on the base's code-host or a repo-level lock the base names), check it
+  before starting, post one when starting, and close it in the digest. Two different epics
+  running at once would share the base branch and this serial merge queue — the marker exists to
+  prevent exactly that.
+```
+
+- [ ] **Step 3: Verify.**
 
 Run:
 ```bash
-grep -n "autopilot:fleet <ID>\|roadmaps/<ID>.md\|one\*\* epic per invocation\|effective config" commands/fleet.md
+grep -n "autopilot:fleet <ID>\|roadmaps/<ID>.md\|epic per invocation\|effective config\|repo-global" commands/fleet.md
 ```
-Expected: arg form, overlay path, the one-epic-per-invocation note, and effective-config mention present. (If the `grep` alternation for the bold note misses, re-run `grep -n "epic per invocation" commands/fleet.md`.)
+Expected: arg form, overlay path, the one-epic-per-invocation note, effective-config mention, and the repo-global marker all present.
 
-- [ ] **Step 3: Commit.**
+- [ ] **Step 4: Commit.**
 
 ```bash
 git add commands/fleet.md
-git commit -m "feat(fleet): accept roadmap <ID>, share solo resolution, one epic per run"
+git commit -m "feat(fleet): accept roadmap <ID>, share solo resolution, repo-global session guard"
 ```
 
 ---
@@ -408,9 +442,10 @@ Replace with:
     touch the base).
   - invoked **with no id** → **stop and report** — do not overwrite. Only regenerate the base
     if the user explicitly asks; even then, show what you'd change first.
-- No `roadmap.config.md` yet → **base mode**, continue with §1. (An id given in base mode is
-  recorded as the project's first roadmap; ask at §6 whether to write it as the base's own
-  `## Queue`/`## Source binding` or as a first overlay — default to the base for a brand-new repo.)
+- No `roadmap.config.md` yet → **base mode**, continue with §1 — regardless of whether an id was
+  given. There is no base yet to layer an overlay onto, so an id here is at most a naming hint
+  for the base; never branch into overlay mode without an existing base. (Overlays come later,
+  via a second `/autopilot:init <ID>` run once the base exists.)
 ```
 
 - [ ] **Step 3: Append §10 (overlay mode) at the end of the file**, after the current §9 "Report" section (which ends `…the full schema of every section.`). Edit `old_string`:
@@ -831,6 +866,6 @@ git commit -m "docs: consistency sweep for multi-roadmap model"
 
 ## Self-review (completed during planning)
 
-- **Spec coverage:** base ⊕ overlay model → Task 1; section-level override → Tasks 1, 3, AGENTS invariant (9); resolution/selection → Tasks 1, 4, 5; backward compat → Tasks 1, 4; init overlay mode → Tasks 6, 7; files-to-change table → Tasks 1–10; non-goal (no parallel epics) → Tasks 5, README (9); version bump → Task 10; invariants preserved → Tasks 2, 9. All spec sections map to a task.
+- **Spec coverage:** base ⊕ overlay model → Task 1; section-level override → Tasks 1, 3, AGENTS invariant (9); resolution/selection → Tasks 1, 4, 5; "required overlay section absent = config error at resolution time" → Tasks 1, 4 (and the schema rule in 1); backward compat → Tasks 1, 4; init overlay mode → Tasks 6, 7; no-persisted-pointer non-goal (handoff is in-session) → Task 3; non-goal (no parallel epics) enforced by the repo-global session marker → Task 5; files-to-change table → Tasks 1–10; version bump → Task 10; invariants preserved → Tasks 2, 9. All spec sections map to a task.
 - **Placeholder scan:** the only `TODO`/`TBD` strings are the intentional scaffold placeholders written *into* generated overlays (Task 6/8), not gaps in the plan.
 - **Term consistency:** "effective config", "base ⊕ overlay", "section-level override", and `roadmaps/<ID>.md` are used identically across every task and match the spec.
