@@ -67,6 +67,11 @@ over the merge/bookkeeping steps below.
 
 ## 5. PR & merge
 
+Throughout, **the base** is whatever the effective `## Code-host binding` names — the roadmap's
+integration branch when one is configured, mainline otherwise. A task never merges to mainline
+directly and never runs `reconcile`; reconciling an integration branch to mainline is the
+orchestrator's mission-complete step (`autopilot:standards` §11).
+
 - `open-pr` using the project's template, in the project's language, with the item linked in
   the footer. Honor the no-attribution rule.
 - `comment-pr` (or `note` on the item) with the PR reference.

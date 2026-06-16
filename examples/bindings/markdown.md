@@ -32,3 +32,7 @@ Assume a `ROADMAP.md` whose items look like:
   exactly this binding.
 - Because the source is a file in the repo, `complete`/`park`/`note` are ordinary commits —
   fold them into the task's PR or a tiny bookkeeping commit.
+- The **per-roadmap** session marker (one solo/fleet run per roadmap at a time) is a line in
+  the checklist file (e.g. `<!-- SESSION: open -->` / `closed`): check it before starting, post
+  on start, close in the digest. With one checklist per roadmap the marker is naturally
+  per-roadmap; a different roadmap's file is untouched.

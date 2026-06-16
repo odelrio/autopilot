@@ -70,10 +70,13 @@ item cap — a session does as many items as its context allows, then resumes.
 
 ## Stop conditions
 
-Per `autopilot:standards` §9: **mission complete** (write the final digest, end; if on a
-loop, do not reschedule) · **session boundary** (finish the current item, write a resume
-digest, stop; resume next firing) · **safety** (two consecutive failed gates on one item →
-park, next; two consecutive parked items → digest and stop).
+Per `autopilot:standards` §9: **mission complete** (if the roadmap uses an integration branch,
+`reconcile` it into mainline first — full `verify` gate + conflict protocol, `park` the reconcile
+and report if it conflicts irreducibly; then write the final digest, close the marker, end; if on
+a loop, do not reschedule) · **session boundary** (finish the current item, **do not reconcile** —
+leave the integration branch open — write a resume digest, close the marker, stop; resume next
+firing) · **safety** (two consecutive failed gates on one item → park, next; two consecutive
+parked items → digest and stop).
 
 To run the doable roadmap to completion unattended, launch this command on a loop; it ends
 itself at mission complete.
@@ -95,7 +98,16 @@ non-blocking, per `autopilot:standards` §3:
   never block. If `list-open` fails twice, circuit-break it for the session and continue from
   the queue.
 
-## Start
+## Session guard & start
 
-Resolve the roadmap (above). Fetch the base. Read the effective config (base ⊕ overlay). Run the
-drift check, then run `autopilot:task` from the top of that roadmap's queue.
+Resolve the roadmap (above). **Check this roadmap's session marker** — the per-roadmap
+open/closed signal its source binding defines (`autopilot:standards` §10). If it is open, another
+run already owns this roadmap: stop and say so (two runs on one roadmap would share its queue).
+Otherwise post the marker open. Two agents on *different* roadmaps may run at once — the marker
+is per-roadmap, never a repo-wide lock.
+
+Then fetch the base and read the effective config (base ⊕ overlay). If the roadmap runs on an
+**integration branch** (its `## Code-host binding` targets `integration/<ID>` rather than
+mainline), merge mainline forward into it now and re-run `verify` after any conflict, so the
+eventual `reconcile` stays small. Run the drift check, then run `autopilot:task` from the top of
+that roadmap's queue. Close the marker in the end-of-run digest.

@@ -134,7 +134,9 @@ These apply whenever a fleet runs agents in parallel against one repository.
 ## 6. The strictly-serial merge queue (fleet only)
 
 This is what makes parallel execution safe. The orchestrator merges **one PR at a time**,
-in completion order. For each ready PR:
+in completion order, onto the **roadmap's configured base** — its integration branch when one is
+set (§11), mainline otherwise; two concurrent roadmaps each run their own queue on their own
+branch and never interact. For each ready PR:
 
 1. **Rebase** onto the fresh remote base. Apply the project's conflict protocol: regenerate
    (never hand-merge) generated artifacts; resolve ordering collisions per the config;
@@ -196,3 +198,37 @@ Autopilot runs to completion, then stops — it is not a daemon.
 - **Safety** — two consecutive failed gates on the same task: `park` it and take the next.
   Two consecutive parked tasks in a row: likely systemic — write a digest and stop rather
   than burning the queue.
+
+## 10. The session marker (one run per roadmap)
+
+Autopilot runs **at most one solo/fleet per roadmap at a time** — two runs on one roadmap would
+share its queue and trample each other. Two agents driving *different* roadmaps may run
+concurrently; the marker is **per-roadmap**, never a repo-wide lock.
+
+- The marker is a small open/closed signal the roadmap's **source binding** provides, anchored
+  to that roadmap's own source (a comment or label on the epic / tracking issue, a line in the
+  checklist — see `examples/bindings/`).
+- Check it before starting; if open, stop and report (another run owns this roadmap). Post it
+  open on start; close it in the end-of-run digest.
+- A crashed run can leave it open — a human clears a stale marker. The engine never
+  force-steals an open roadmap.
+
+## 11. Integration branches and reconciliation
+
+A roadmap that runs **alongside another** targets its own integration branch instead of mainline
+(its effective `## Code-host binding` points `branch`/`open-pr`/`merge` at `integration/<ID>`).
+This makes concurrency safe **by construction**: each roadmap's serial merge queue (§6) lives on
+its own branch, so two concurrent runs never share a queue and cannot collide — no cross-roadmap
+lane-surface coordination is needed.
+
+- **Keep the branch fresh.** Merge mainline forward into the integration branch periodically
+  (the fleet whenever a lane drains, solo at the start of each run), re-running `verify` after
+  any conflict, so the final merge stays small.
+- **Reconcile once, at mission-complete.** `reconcile` merges the integration branch into
+  mainline behind the full `verify` gate and the conflict protocol — a single deliberate merge,
+  naturally serialized with any other roadmap's reconcile because they all target mainline. If
+  it conflicts irreducibly, `park` the reconcile with a note and report; never force it.
+- **Never reconcile at a session boundary** — the roadmap is unfinished; leave the integration
+  branch open for the next run.
+- A roadmap that runs alone skips all of this: it targets mainline directly and has no
+  `reconcile`.

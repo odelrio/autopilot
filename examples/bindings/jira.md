@@ -26,5 +26,7 @@ double as the decision log.
   the source of dependency order; Jira status only tells you what is already taken or done.
   `list-open` is the escape hatch for that: it lists everything open under the epic so the
   engine's drift check can flag subtasks added to Jira after the queue was written.
-- The fleet's "one open session" guard can be a marker comment on the epic
-  (`FLEET-SESSION open`/`closed`) checked before spawning.
+- The **per-roadmap** session marker (one solo/fleet run per roadmap at a time) is a marker
+  comment on the epic (`FLEET-SESSION open`/`closed`): check it before starting, post it on
+  start, close it in the digest. It is anchored to *this* epic, so a different epic's run is
+  unaffected.

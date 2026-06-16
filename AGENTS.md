@@ -55,7 +55,7 @@ interactive command: `solo` and `fleet` never ask the user anything.
 The engine emits these verbs; bindings resolve them to real commands:
 
 - **Roadmap-source:** `next-ready`, `list-open`, `claim`, `complete`, `park`, `note`, `log-decision`, `derive`
-- **Code-host:** `branch`, `push`, `open-pr`, `comment-pr`, `merge`
+- **Code-host:** `branch`, `push`, `open-pr`, `comment-pr`, `merge`, and `reconcile` (integration-branch roadmaps only)
 
 ### Plugin manifest
 
@@ -76,7 +76,11 @@ epic adds an overlay `roadmaps/<ID>.md` with its own `## Source binding` and `##
 effective config is base ⊕ overlay (section-level override, overlay wins); `/autopilot:solo
 <ID>` / `/autopilot:fleet <ID>` select the epic. With no `roadmaps/`, the root file is the
 single roadmap. Start from `examples/roadmaps/BRU-101.md`; full rules in
-`docs/config-schema.md` → *One roadmap or several*.
+`docs/config-schema.md` → *One roadmap or several*. Two roadmaps may run **concurrently** (one
+agent each; a per-roadmap session marker blocks two runs on the same roadmap) — give each its own
+**integration branch** so their serial merge queues never share a branch, with a single
+`reconcile` to mainline at epic completion (`docs/config-schema.md` → *Concurrent roadmaps and
+integration branches*).
 
 Pre-built binding snippets live in `examples/bindings/` — paste and adjust:
 - **Source:** `jira.md` (`acli`), `github-issues.md` (`gh`), `markdown.md` (checklist, no tracker)

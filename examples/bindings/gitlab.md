@@ -10,6 +10,17 @@ Copy into your `roadmap.config.md` under `## Code-host binding`.
 | `open-pr`    | `glab mr create --source-branch <branch> --target-branch main --title "..." --description-file mr.md` |
 | `comment-pr` | `glab mr note <IID> --message "..."` (post review evidence here before any prose).                |
 | `merge`      | `glab mr merge <IID> --squash --remove-source-branch`, then `git switch main && git pull --prune`. |
+| `reconcile`  | *(integration-branch roadmaps only)* `git switch main && git pull`, `git merge --no-ff integration/<ID>`, run the full `verify` gate, resolve any conflict via the protocol below, then `git push origin main`. Run once at mission-complete. |
+
+## Integration branch (concurrent roadmaps only)
+
+A roadmap meant to run **alongside another** points its code-host base at its own integration
+branch instead of `main`, so the two never share a merge queue. In the overlay's
+`## Code-host binding`, replace the `main` token: `branch` from `origin/integration/<KEY>`,
+`open-pr --target-branch integration/<KEY>`, `merge` into it. Define `reconcile` (row above) for
+the final `integration/<KEY>` → `main` merge, and merge `main` forward into the integration
+branch periodically (`git switch integration/<KEY> && git merge origin/main`) so that final
+merge stays small. A roadmap that runs alone keeps `main` and omits all of this.
 
 ## Conflict protocol (for the merge queue)
 

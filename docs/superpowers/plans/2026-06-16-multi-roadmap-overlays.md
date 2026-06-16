@@ -356,6 +356,14 @@ the serial merge queue).
 
 - [ ] **Step 2: Make the session marker repo-global.**
 
+> **Superseded (2026-06-16, v0.5.0).** This step was reversed. The session marker is
+> **per-roadmap**, not repo-global: two agents may run two *different* roadmaps at once.
+> Cross-roadmap merge collisions are prevented structurally by giving each concurrently-run
+> roadmap its own **integration branch** (its serial merge queue lives on that branch), reconciled
+> to mainline once at epic completion. See `commands/fleet.md` Claim protocol, `docs/config-schema.md`
+> → *Concurrent roadmaps and integration branches*, and `autopilot:standards` §10–§11. The
+> repo-global text below is kept only as a historical record of the original plan.
+
 The Claim protocol's "Never run two fleets/solos at once" guard currently anchors the session
 marker to the source binding — which now lives in the overlay, so two *different* epics would no
 longer collide and could trample the shared base branch and serial merge queue. The guard must

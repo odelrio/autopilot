@@ -22,8 +22,10 @@ initiative/epic). The config splits accordingly:
   `## Environment gotchas`, and a default `## Canonical docs`.
 - **`roadmaps/<ID>.md` — an epic overlay** *(optional)*. Holds what is specific to one
   initiative: `## Source binding` and `## Queue` (both **required** in an overlay), plus
-  `## Reserved decisions`, and optional overrides of `## Canonical docs`, `## Spec gate`, and
-  `## Conventions`. `<ID>` (e.g. `BRU-101`) is both the filename stem and the argument you pass
+  `## Reserved decisions`, and optional overrides of `## Canonical docs`, `## Spec gate`,
+  `## Conventions`, and — when the roadmap runs concurrently on its own integration branch —
+  `## Code-host binding` (to retarget `branch`/`open-pr`/`merge` at that branch; see *Concurrent
+  roadmaps and integration branches* below). `<ID>` (e.g. `BRU-101`) is both the filename stem and the argument you pass
   to `/autopilot:solo`, `/autopilot:fleet`, and `/autopilot:init`. When the overlay's source is
   the Markdown checklist (no tracker), that epic's checklist lives beside it at
   `roadmaps/<ID>.ROADMAP.md` — the per-epic counterpart of a single-roadmap repo's root
@@ -38,6 +40,23 @@ in the overlay?".
 **Backward compatible.** With no `roadmaps/` directory, the root `roadmap.config.md` is itself
 the single roadmap and carries every section, exactly as before. Overlays are purely additive:
 adopt them only when a repo needs more than one roadmap.
+
+### Concurrent roadmaps and integration branches
+
+Two roadmaps may run at the same time — two agents, one roadmap each. (Never two agents on one
+roadmap; never two roadmaps in one invocation — both share a queue.) To keep their merges from
+racing on a shared mainline, give each concurrently-run roadmap its own **integration branch**
+and point its `## Code-host binding` there: `branch` from `origin/integration/<ID>`, `open-pr
+--base integration/<ID>`, `merge` into `integration/<ID>`. Each roadmap's serial merge queue
+then operates **only on its own branch**, so concurrent fleets cannot collide — the isolation is
+structural, not a matter of lane discipline.
+
+A roadmap on an integration branch defines one extra code-host verb, **`reconcile`**: at
+mission-complete it merges the integration branch into the repo's mainline base, once, behind
+the full `verify` gate and the conflict protocol. To keep that final merge small, the engine
+also merges mainline **forward** into the integration branch periodically while the roadmap runs
+(the fleet whenever a lane drains, solo at the start of each run). A roadmap that runs alone
+needs none of this: it targets the mainline base directly and has no `reconcile`.
 
 ## The verb contract
 
@@ -65,6 +84,7 @@ The engine never names a provider. It emits these verbs, and your bindings resol
 | `open-pr`     | Open a pull/merge request from the branch.                 |
 | `comment-pr`  | Post a comment (review evidence) on the PR.                |
 | `merge`       | Merge the PR into the base and clean up the branch.        |
+| `reconcile`   | *(integration-branch roadmaps only)* Merge this roadmap's integration branch into the repo's mainline base — once, at mission-complete, behind the full `verify` gate and the conflict protocol. |
 
 ## Required sections of `roadmap.config.md`
 
@@ -140,6 +160,16 @@ and items in the queue already closed or gone (`drift: <ids> queue-only`). The c
 un-queued item, and never blocks. It surfaces the drift in the run's chat output and digest so
 the owner can place the new items in the `## Queue`. If `list-open` fails, it circuit-breaks per
 `autopilot:standards` §3 and the run continues from the queue.
+
+### The session marker (one run per roadmap)
+
+`/autopilot:solo` and `/autopilot:fleet` run **at most one session per roadmap** at a time: two
+agents may drive two *different* roadmaps concurrently, but never the same one (they would share
+its queue). Each enforces this with a **session marker** anchored to that roadmap's own source —
+a small open/closed signal the source binding provides (e.g. a `FLEET-SESSION open`/`closed`
+comment on the epic, a label, or a line in the checklist). The engine checks it before starting,
+posts it on start, and closes it in the end-of-run digest. It is **per-roadmap**, never a
+repo-wide lock — see each binding in `examples/bindings/` for where it lives.
 
 ### Selecting a roadmap
 

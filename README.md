@@ -96,6 +96,13 @@ or `/autopilot:fleet BRU-101`. With no `roadmaps/` directory the root file is si
 roadmap, exactly as before — overlays are additive. Full rules:
 `docs/config-schema.md` → *One roadmap or several*. One epic runs per `solo`/`fleet` invocation.
 
+Two roadmaps may run **at the same time** (two agents, one epic each — a per-roadmap session
+marker blocks two runs on the *same* roadmap). To keep their merges from racing, give each
+concurrently-run roadmap its own **integration branch**: each epic's PRs target that branch, so
+the two serial merge queues never share a branch, and a single `reconcile` merges it to mainline
+when the epic completes. See `docs/config-schema.md` → *Concurrent roadmaps and integration
+branches*.
+
 ## Dry run (optional but recommended)
 
 Before an unattended session, sanity-check selection with the lightest binding. Put a
