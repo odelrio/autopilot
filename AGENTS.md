@@ -26,8 +26,8 @@ The engine is **project-agnostic**. It speaks abstract verbs only; a consuming p
 ```
 Engine (this plugin)      commands/solo · commands/fleet · skills/task · skills/standards
    │  speaks abstract verbs only
-Project config            roadmap.config.md  +  bindings  (examples/ has copyable templates)
-   │  resolves verbs → real tools
+Project config            roadmap.config.md (base)  +  roadmaps/<ID>.md (per-epic overlays)
+   │  resolves verbs → real tools; effective config = base ⊕ overlay (overlay wins)
 Your repository           the roadmap actually gets executed
 ```
 
@@ -70,6 +70,14 @@ Consumers drop a `roadmap.config.md` at their repo root. Start from
 `## Reserved decisions`, `## Queue`, `## Canonical docs`. Optional: `## Spec gate`,
 `## Environment gotchas`.
 
+**Multiple roadmaps:** one repo may run several epic-scoped roadmaps. The root
+`roadmap.config.md` holds the project-wide sections (host, verify, review, conventions); each
+epic adds an overlay `roadmaps/<ID>.md` with its own `## Source binding` and `## Queue`. The
+effective config is base ⊕ overlay (section-level override, overlay wins); `/autopilot:solo
+<ID>` / `/autopilot:fleet <ID>` select the epic. With no `roadmaps/`, the root file is the
+single roadmap. Start from `examples/roadmaps/BRU-101.md`; full rules in
+`docs/config-schema.md` → *One roadmap or several*.
+
 Pre-built binding snippets live in `examples/bindings/` — paste and adjust:
 - **Source:** `jira.md` (`acli`), `github-issues.md` (`gh`), `markdown.md` (checklist, no tracker)
 - **Code-host:** `github.md` (`gh`), `gitlab.md` (`glab`)
@@ -87,6 +95,10 @@ Pre-built binding snippets live in `examples/bindings/` — paste and adjust:
 - `skills/task` drives one item; the fleet orchestrator drives the merge queue. This separation
   is load-bearing: fleet subagents do **not** merge — they stop after PR open and triage; the
   orchestrator's serial merge queue handles everything else.
+- The base ⊕ overlay split is section-level override, never a deep merge: an overlay section
+  replaces the base section of the same name. `## Source binding` and `## Queue` belong to the
+  overlay; host/verify/review/conventions belong to the base. Keep `docs/config-schema.md` →
+  *One roadmap or several* as the authority and don't restate the resolution rules elsewhere.
 - The user-facing walkthrough is `README.md`; the deep schema reference is
   `docs/config-schema.md`. When you change a section name or the verb contract, update
   `docs/config-schema.md` in the same change — it is the schema of record for consumer configs.

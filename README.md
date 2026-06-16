@@ -66,7 +66,8 @@ Confirm it loaded: `/help` should list `/autopilot:init`, `/autopilot:solo`, and
    base branch, likely canonical docs — shows you what it found, lets you correct anything,
    then writes `roadmap.config.md` (and a starter `ROADMAP.md` if you pick the Markdown
    checklist source). `init` is the **only** autopilot command that asks you questions;
-   `solo` and `fleet` never do. It won't overwrite an existing `roadmap.config.md`.
+   `solo` and `fleet` never do. It won't overwrite an existing `roadmap.config.md` — and
+   `/autopilot:init BRU-101` instead scaffolds an epic overlay (see *Multiple roadmaps* below).
 
 2. **Fill the TODOs it leaves.** A few sections only you can supply — chiefly `## Queue`
    (your dependency-ordered work and the fleet's lane surfaces), `## Reserved decisions`, and
@@ -79,6 +80,21 @@ Confirm it loaded: `/help` should list `/autopilot:init`, `/autopilot:solo`, and
      for each, and merges through a strictly-serial queue.
    - **Unattended to completion:** launch either on a loop. It ends itself at mission
      complete and does not reschedule.
+
+## Multiple roadmaps in one repo
+
+One repo can run several independent roadmaps (one per initiative/epic). The config splits into
+a shared **base** and per-epic **overlays**:
+
+- `roadmap.config.md` (root) — the project base: code host, verify gate, review ritual,
+  conventions.
+- `roadmaps/<ID>.md` — an epic overlay: that epic's `## Source binding` and `## Queue` (plus
+  optional overrides). The effective config is base + overlay, section-level override.
+
+Scaffold a new epic with `/autopilot:init BRU-101`, then run it with `/autopilot:solo BRU-101`
+or `/autopilot:fleet BRU-101`. With no `roadmaps/` directory the root file is simply the single
+roadmap, exactly as before — overlays are additive. Full rules:
+`docs/config-schema.md` → *One roadmap or several*. One epic runs per `solo`/`fleet` invocation.
 
 ## Dry run (optional but recommended)
 
