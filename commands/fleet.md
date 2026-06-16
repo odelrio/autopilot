@@ -113,4 +113,7 @@ parked PRs in the merge queue → drain and stop.
 
 One line per event: `lane:backend ITEM-23 spawned` · `ITEM-23 → PR #20 ready` ·
 `ITEM-23 → merged, done` · `ITEM-24 → parked: <≤5 words>`. Digest pointer at the end. Nothing
-else.
+else. The engine's mechanics stay internal (`autopilot:standards` §4): never narrate
+overlay/roadmap resolution, dependency-readiness analysis, or lane/wave grouping — how lanes
+were derived is yours, not the user's. Only the event lines, the one-line drift report, and the
+digest pointer reach chat.

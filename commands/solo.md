@@ -58,7 +58,9 @@ config names.
 Per `autopilot:standards` §4. One line per item to the chat —
 `ITEM-ID → PR #N merged` or `ITEM-ID → parked: <reason, ≤5 words>`. All prose lives in
 artifacts. At session end, one digest entry on the roadmap log plus its one-line pointer in
-chat.
+chat. The engine's mechanics stay internal (§4): never narrate overlay/roadmap resolution,
+the drift reconciliation, or how you sequenced the queue — only the contract lines, the
+one-line drift report, and the digest pointer reach chat.
 
 ## Run to completion, then stop (not a daemon)
 
