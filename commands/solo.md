@@ -76,7 +76,24 @@ park, next; two consecutive parked items → digest and stop).
 To run the doable roadmap to completion unattended, launch this command on a loop; it ends
 itself at mission complete.
 
+## Drift check (queue vs source)
+
+Once, at the start of a run, reconcile the `## Queue` against the live source — best-effort and
+non-blocking, per `autopilot:standards` §3:
+
+- `list-open` the source to get the set of open item ids.
+- Compare it with the ids in the `## Queue`, and report the difference in one line, to chat and
+  the digest:
+  - open in the source but **not in the queue** → `drift: <ids> not in queue`. New work added
+    after the queue was written. Do **not** work it — you have no dependency order or lane for
+    it; leave it for the owner to place in `## Queue`.
+  - in the queue but **no longer open** in the source → `drift: <ids> queue-only`. Already
+    closed or removed; skip it.
+- **Detect and report only.** Never invent an order or lane, never work an un-queued item,
+  never block. If `list-open` fails twice, circuit-break it for the session and continue from
+  the queue.
+
 ## Start
 
-Resolve the roadmap (above). Fetch the base. Read the effective config (base ⊕ overlay). Then
-run `autopilot:task` from the top of that roadmap's queue.
+Resolve the roadmap (above). Fetch the base. Read the effective config (base ⊕ overlay). Run the
+drift check, then run `autopilot:task` from the top of that roadmap's queue.

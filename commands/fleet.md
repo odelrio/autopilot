@@ -78,6 +78,11 @@ Before blaming the environment for a flaky gate, sweep for orphaned processes
 (`autopilot:standards` §2) — a dead lane agent's leftovers can starve every gate. Sweep
 whenever a lane drains.
 
+You inherit `/autopilot:solo`'s **drift check** (queue vs source) at the start of the run;
+re-run it whenever a lane drains, alongside the orphan-process sweep, so work added to the
+source mid-session surfaces in the digest. It stays detect-and-report only — never auto-claim or
+auto-queue a drifted item; the owner places it.
+
 ## Crash recovery
 
 Per `autopilot:standards` §7. A "completed" notification with a mid-flight final message means

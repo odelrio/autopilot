@@ -48,6 +48,7 @@ The engine never names a provider. It emits these verbs, and your bindings resol
 | Verb           | Meaning                                                                 |
 | -------------- | ----------------------------------------------------------------------- |
 | `next-ready`   | The next workable item: first in queue order whose dependencies are all done and whose surface fits the lane. |
+| `list-open`    | Enumerate the open (not-done) work items currently under this roadmap's scope in the source, independent of the `## Queue`. Powers the drift check (see *How the engine consumes it*). |
 | `claim`        | Mark an item as owned/in-progress so no other lane takes it.            |
 | `complete`     | Mark an item done.                                                      |
 | `park`         | Return an item to the backlog with a reason (blocked, failed, deferred).|
@@ -75,8 +76,9 @@ between the base and each overlay as described in **One roadmap or several** abo
 sections stay in the base.
 
 1. **`## Source binding`** — one resolution per roadmap-source verb. The concrete command or
-   procedure for `next-ready`, `claim`, `complete`, `park`, `note`, `log-decision`, `derive`.
-   See `examples/bindings/jira.md`, `github-issues.md`, or `markdown.md`.
+   procedure for `next-ready`, `list-open`, `claim`, `complete`, `park`, `note`,
+   `log-decision`, `derive`. See `examples/bindings/jira.md`, `github-issues.md`, or
+   `markdown.md`.
 
 2. **`## Code-host binding`** — one resolution per code-host verb (`branch`, `push`,
    `open-pr`, `comment-pr`, `merge`), plus the **conflict protocol**: which artifacts are
@@ -121,6 +123,23 @@ sections stay in the base.
 - `autopilot:standards` is **not** configured here — it is the fixed discipline layer. The
   config can override a specific standard by saying so explicitly, but the defaults hold
   otherwise.
+
+### Drift between the queue and the source
+
+The `## Queue` is owner-maintained: it encodes dependency order and lane surfaces, which the
+source (Jira, GitHub Issues, a checklist) does not. So `next-ready` is **queue-driven** — it
+never works an item the queue doesn't list. That leaves a gap: work added to the source *after*
+the queue was written is invisible to the engine.
+
+To close the gap without surrendering the queue's authority, `/autopilot:solo` and
+`/autopilot:fleet` run a **drift check** at the start of a run (and the fleet re-checks whenever
+a lane drains): `list-open` the source, compare against the `## Queue` ids, and **report** the
+difference — items open in the source but absent from the queue (`drift: <ids> not in queue`)
+and items in the queue already closed or gone (`drift: <ids> queue-only`). The check is
+**detect-and-report only**: it never invents a dependency order or lane, never works an
+un-queued item, and never blocks. It surfaces the drift in the run's chat output and digest so
+the owner can place the new items in the `## Queue`. If `list-open` fails, it circuit-breaks per
+`autopilot:standards` §3 and the run continues from the queue.
 
 ### Selecting a roadmap
 
