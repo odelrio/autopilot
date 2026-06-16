@@ -165,7 +165,8 @@ shape from `examples/bindings/markdown.md`). Never overwrite an existing one.
 ## 9. Report
 
 State the files written — the initiative overlay `roadmaps/<id>.md` (and the base
-`roadmap.config.md` if you created it this run) — and what's left: fill the overlay's TODO sections
+`roadmap.config.md` if you created it this run) — that they were **committed** (§11, not yet
+pushed), and what's left: fill the overlay's TODO sections
 (start with `## Queue`), optionally run the README dry-run to sanity-check selection, then run the
 initiative with `/autopilot:solo <id>` (single agent) or `/autopilot:fleet <id>` (parallel). Point
 to `docs/config-schema.md` for the full schema.
@@ -199,4 +200,21 @@ place, freshly written or pre-existing. Reuse the base for everything project-wi
    `roadmaps/<ID>.ROADMAP.md` (the `- [ ] ID — title (deps: …)` shape from
    `examples/bindings/markdown.md`) and point the overlay's source binding at it. Never overwrite
    an existing one.
-7. **Report** per §9.
+7. **Commit the scaffold** (§11), then **report** per §9.
+
+## 11. Commit the scaffold
+
+Scaffolding the roadmap is not done until it is committed. Uncommitted config is invisible to
+freshly-branched worktrees (solo/fleet subagents branch off the committed base) and is discarded
+when a worktree is removed — so an uncommitted roadmap is silently lost. After writing the files
+in this run, stage and commit exactly them on the current branch:
+
+- The overlay `roadmaps/<id>.md` (and `roadmaps/<id>.ROADMAP.md` if written), plus
+  `roadmap.config.md` **only if** you created it this run.
+- `git add <those paths>` then `git commit -m "chore(roadmap): scaffold <id>"` — stage the paths
+  explicitly, never `git add -A`, so you commit only what init wrote. (Substitute the base config
+  message when you created it: `chore(roadmap): set up base config + scaffold <id>`.)
+- Per `autopilot:standards` §5, `branch`/`commit` can lose an index-lock race — retry after a few
+  seconds. If the working tree had unrelated staged changes, leave them; only add init's own paths.
+- Pushing is the owner's call; committing is what keeps the roadmap from being lost. Note in the
+  report (§9) that the scaffold was committed and is not yet pushed.
