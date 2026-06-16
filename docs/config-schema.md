@@ -24,7 +24,10 @@ initiative/epic). The config splits accordingly:
   initiative: `## Source binding` and `## Queue` (both **required** in an overlay), plus
   `## Reserved decisions`, and optional overrides of `## Canonical docs`, `## Spec gate`, and
   `## Conventions`. `<ID>` (e.g. `BRU-101`) is both the filename stem and the argument you pass
-  to `/autopilot:solo`, `/autopilot:fleet`, and `/autopilot:init`.
+  to `/autopilot:solo`, `/autopilot:fleet`, and `/autopilot:init`. When the overlay's source is
+  the Markdown checklist (no tracker), that epic's checklist lives beside it at
+  `roadmaps/<ID>.ROADMAP.md` — the per-epic counterpart of a single-roadmap repo's root
+  `ROADMAP.md`.
 
 **Composition is section-level override.** The *effective config* for a roadmap is the base,
 with each top-level `##` section present in the overlay **replacing** the base section of the
