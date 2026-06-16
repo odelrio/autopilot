@@ -9,5 +9,13 @@ autodetects what the repo already reveals, confirms every choice with you, and w
 This is the one interactive autopilot command — unlike `/autopilot:solo` and `/autopilot:fleet`,
 `init` is allowed to ask you questions before it writes anything.
 
-If `roadmap.config.md` already exists, it reports that and stops rather than overwriting your
-config.
+Two ways to run it:
+
+- **`/autopilot:init`** — first-time setup: autodetect and scaffold the project base
+  `roadmap.config.md`. If a base already exists, it reports that and stops rather than
+  overwriting your config.
+- **`/autopilot:init <ID>`** (e.g. `/autopilot:init BRU-101`) — with a base already present,
+  scaffold a new **epic overlay** `roadmaps/<ID>.md` (its own source binding and queue, reusing
+  the base's code host, verify gate, and conventions). The epic then runs via
+  `/autopilot:solo <ID>` or `/autopilot:fleet <ID>`. See `docs/config-schema.md` →
+  *One roadmap or several*. It won't overwrite an existing overlay.
