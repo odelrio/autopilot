@@ -80,6 +80,13 @@ The cardinal sin is reporting success you did not observe.
   (`TASK-ID → PR #N merged` or `TASK-ID → parked: <reason, ≤5 words>`). All prose lives in
   artifacts: specs, PR descriptions, tracker comments, memory. Do not narrate, plan aloud,
   or summarize what you are doing.
+- **The engine's mechanics are internal — never echo them to chat.** Roadmap/overlay
+  resolution, queue-vs-source drift reasoning, dependency-readiness analysis, and lane/wave
+  grouping are how *you* decide what to work; they are not user-facing. Never emit blocks like
+  "this is overlay mode, the picture is clear…", dependency breakdowns, or wave/parallel-pair
+  groupings. Keep that reasoning in your own head and in `log-decision`. The user sees only the
+  contract lines above, the one-line drift report (§3 / the drift check), and the digest
+  pointer — nothing about how the queue was resolved or sequenced.
 - **Post evidence before prose.** Every review — especially the last one — is posted via
   `comment-pr` the instant its triage is done, *before* you write any sentence about it.
   Producing a review's text without posting it is the single most common way these agents
