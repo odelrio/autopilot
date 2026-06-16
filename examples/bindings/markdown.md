@@ -17,6 +17,7 @@ Assume a `ROADMAP.md` whose items look like:
 | Verb           | Resolution                                                                                       |
 | -------------- | ------------------------------------------------------------------------------------------------ |
 | `next-ready`   | The first `[ ]` item whose every listed dependency id is `[x]`. (Pure text scan — no tools.)      |
+| `list-open`    | Every `[ ]` item id in the file. (For a Markdown source the file *is* the queue, so drift is usually empty — it only shows up if you keep the checklist and `## Queue` as separate lists.) |
 | `claim`        | No-op, or append ` (claimed)` to the line. A single-writer checklist rarely needs claiming.        |
 | `complete`     | Flip the item's `[ ]` to `[x]`, commit `ROADMAP.md`.                                              |
 | `park`         | Leave the item `[ ]`; append ` — parked: <reason>` to the line.                                   |

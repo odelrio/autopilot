@@ -54,7 +54,7 @@ interactive command: `solo` and `fleet` never ask the user anything.
 
 The engine emits these verbs; bindings resolve them to real commands:
 
-- **Roadmap-source:** `next-ready`, `claim`, `complete`, `park`, `note`, `log-decision`, `derive`
+- **Roadmap-source:** `next-ready`, `list-open`, `claim`, `complete`, `park`, `note`, `log-decision`, `derive`
 - **Code-host:** `branch`, `push`, `open-pr`, `comment-pr`, `merge`
 
 ### Plugin manifest

@@ -23,8 +23,8 @@ Your repository           the roadmap actually gets executed
 
 The engine never names a provider. Your config resolves these:
 
-- **Roadmap-source:** `next-ready`, `claim`, `complete`, `park`, `note`, `log-decision`,
-  `derive`.
+- **Roadmap-source:** `next-ready`, `list-open`, `claim`, `complete`, `park`, `note`,
+  `log-decision`, `derive`.
 - **Code-host:** `branch`, `push`, `open-pr`, `comment-pr`, `merge`.
 
 ## What's inside

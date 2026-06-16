@@ -17,6 +17,7 @@ comments are the decision log.
 | Verb           | Command                                                                                   |
 | -------------- | ----------------------------------------------------------------------------------------- |
 | `next-ready`   | First item in `## Queue` order whose deps are `Done`; cross-check with `acli jira workitem list --jql "parent = ACME-100 AND status = 'To Do'"`. |
+| `list-open`    | `acli jira workitem list --jql "parent = ACME-100 AND statusCategory != Done"` (drift check). |
 | `claim`        | `acli jira workitem transition --key <KEY> --status "In Progress"`                         |
 | `complete`     | `acli jira workitem transition --key <KEY> --status "Done"`                                |
 | `park`         | transition to `"To Do"` + `note` the reason                                               |
