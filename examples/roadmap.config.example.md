@@ -4,6 +4,10 @@
 > This example wires Jira as the source and GitHub as the code-host. Swap the bindings for
 > the ones under `examples/bindings/` that match your stack. See `docs/config-schema.md` for
 > the full schema and the verb contract.
+>
+> Running **several roadmaps** in one repo? This file becomes the shared **base** (host, verify,
+> review, conventions) and each epic gets an overlay — see `examples/roadmaps/BRU-101.md` and
+> `docs/config-schema.md` → *One roadmap or several*.
 
 ## Source binding
 

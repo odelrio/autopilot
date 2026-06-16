@@ -2,13 +2,25 @@
 description: Autonomous single-agent roadmap execution — works items end-to-end via autopilot:task, one at a time, without blocking, until a stop condition.
 ---
 
-You are executing a project's roadmap autonomously. Read the project's `roadmap.config.md`
-for all bindings, the queue, reserved decisions, and canonical docs. Load
-**`autopilot:standards`** for the discipline you operate under, and drive each item through
-the **`autopilot:task`** skill. Work the queue one item at a time until a stop condition.
-Never ask the user anything; never wait for anyone.
+You are executing a project's roadmap autonomously. You may be invoked as `/autopilot:solo` or
+`/autopilot:solo <ID>`, where `<ID>` names an epic overlay (`roadmaps/<ID>.md`). Resolve the
+**effective config** — the base `roadmap.config.md` composed with the selected overlay
+(section-level override, overlay wins) — for all bindings, the queue, reserved decisions, and
+canonical docs. Load **`autopilot:standards`** for the discipline you operate under, and drive
+each item through the **`autopilot:task`** skill. Work the queue one item at a time until a stop
+condition. Never ask the user anything; never wait for anyone.
 
-If no `roadmap.config.md` exists, stop and say so.
+**Resolve which roadmap before anything else:**
+
+- `<ID>` given and `roadmaps/<ID>.md` exists → run the base ⊕ that overlay.
+- `<ID>` given but no such overlay → stop and list the overlays that exist.
+- No `<ID>`: exactly one file in `roadmaps/` → use it; more than one → stop and list them; none
+  (or no `roadmaps/` directory) → use the root `roadmap.config.md` as the single roadmap.
+- Once an overlay is chosen, it must contain `## Source binding` and `## Queue`. If either is
+  missing, stop and report the missing section — do not silently fall back to the base.
+
+If no `roadmap.config.md` exists at all, stop and say so. Stopping to list overlays is not
+"asking the user" — it is the same fail-fast as a missing config; you still never prompt.
 
 ## Mission
 
@@ -66,4 +78,5 @@ itself at mission complete.
 
 ## Start
 
-Fetch the base. Read `roadmap.config.md`. Then run `autopilot:task` from the top of the queue.
+Resolve the roadmap (above). Fetch the base. Read the effective config (base ⊕ overlay). Then
+run `autopilot:task` from the top of that roadmap's queue.

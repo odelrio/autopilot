@@ -12,6 +12,33 @@ specific to your project lives here — and **only** here. Keep tool names (`gh`
 > and writes most of it for you. This document explains every section so you can edit it — or
 > write it from scratch — by hand.
 
+## One roadmap or several: base ⊕ overlay
+
+A repository may run **one** roadmap or **several** independent ones (one per
+initiative/epic). The config splits accordingly:
+
+- **`roadmap.config.md` (repo root) — the project base.** Holds what every roadmap in the repo
+  shares: `## Code-host binding`, `## Verify`, `## Review ritual`, `## Conventions`,
+  `## Environment gotchas`, and a default `## Canonical docs`.
+- **`roadmaps/<ID>.md` — an epic overlay** *(optional)*. Holds what is specific to one
+  initiative: `## Source binding` and `## Queue` (both **required** in an overlay), plus
+  `## Reserved decisions`, and optional overrides of `## Canonical docs`, `## Spec gate`, and
+  `## Conventions`. `<ID>` (e.g. `BRU-101`) is both the filename stem and the argument you pass
+  to `/autopilot:solo`, `/autopilot:fleet`, and `/autopilot:init`. When the overlay's source is
+  the Markdown checklist (no tracker), that epic's checklist lives beside it at
+  `roadmaps/<ID>.ROADMAP.md` — the per-epic counterpart of a single-roadmap repo's root
+  `ROADMAP.md`.
+
+**Composition is section-level override.** The *effective config* for a roadmap is the base,
+with each top-level `##` section present in the overlay **replacing** the base section of the
+same name. Sections only in the base are inherited; sections only in the overlay are added.
+This is a flat replace, not a deep merge — to know which value wins, ask only "is this section
+in the overlay?".
+
+**Backward compatible.** With no `roadmaps/` directory, the root `roadmap.config.md` is itself
+the single roadmap and carries every section, exactly as before. Overlays are purely additive:
+adopt them only when a repo needs more than one roadmap.
+
 ## The verb contract
 
 The engine never names a provider. It emits these verbs, and your bindings resolve them.
@@ -41,7 +68,11 @@ The engine never names a provider. It emits these verbs, and your bindings resol
 ## Required sections of `roadmap.config.md`
 
 Write it as Markdown with these sections. Headings are conventional; the engine reads the
-content, so be explicit and literal — give exact commands, not descriptions of commands.
+content, so be explicit and literal — give exact commands, not descriptions of commands. In a
+single-roadmap repo all of them live in `roadmap.config.md`. In a multi-roadmap repo they split
+between the base and each overlay as described in **One roadmap or several** above —
+`## Source binding` and `## Queue` move into the overlay; the host/verify/review/conventions
+sections stay in the base.
 
 1. **`## Source binding`** — one resolution per roadmap-source verb. The concrete command or
    procedure for `next-ready`, `claim`, `complete`, `park`, `note`, `log-decision`, `derive`.
@@ -91,5 +122,21 @@ content, so be explicit and literal — give exact commands, not descriptions of
   config can override a specific standard by saying so explicitly, but the defaults hold
   otherwise.
 
-Start from `examples/roadmap.config.example.md` and replace each binding with your project's
-tools.
+### Selecting a roadmap
+
+`/autopilot:solo [ID]` and `/autopilot:fleet [ID]` resolve which roadmap to run:
+
+- **`ID` given, `roadmaps/<ID>.md` exists** → run base ⊕ that overlay.
+- **`ID` given, no such overlay** → stop and list the available overlays.
+- **No `ID`:** exactly one overlay in `roadmaps/` → use it; more than one → stop and list them;
+  none (or no `roadmaps/` directory) → use the root `roadmap.config.md` as the single roadmap.
+
+Once an overlay is selected, it **must** contain the required overlay sections (`## Source
+binding` and `## Queue`). If either is missing, that is a config error: stop and report which
+section the overlay lacks rather than silently falling back to the base.
+
+This keeps `solo`/`fleet` non-interactive: an ambiguous launch fails fast with the valid IDs,
+the same way a missing config does.
+
+Start from `examples/roadmap.config.example.md` (single-roadmap base) and, for a multi-roadmap
+repo, `examples/roadmaps/BRU-101.md` (overlay). Replace each binding with your project's tools.
