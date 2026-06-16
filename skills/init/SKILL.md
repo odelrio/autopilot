@@ -121,11 +121,16 @@ Scan the repo root for build manifests, first match wins; propose the command, l
 
 - Base branch: `git symbolic-ref refs/remotes/origin/HEAD` (fall back to whichever of `main` /
   `master` exists).
-- Conventions: propose the engine defaults — commit & PR title `feat(<ID>): …`, artifacts in the
-  repo's language, no AI-tooling attribution. Branch naming has two forms: a **tracker-backed**
-  roadmap uses `<type>/<ITEM-KEY>-<slug>` (`feat/`, `fix/`, `chore/`, `refactor/`); a
-  **slug-named** roadmap (no tracker — id derived per *Interpreting the argument*) groups its items
-  under the roadmap slug as `<type>/<roadmap-slug>/<item-slug>`. The user adjusts at confirm.
+- Conventions: **detect the project's own rules before defaulting.** Read the commit/branch
+  guidance the project already states (`AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, a `.gitmessage`
+  template) and the shape of recent history (`git log --oneline -20`, the existing branch names);
+  adopt that commit-message style, branch-naming scheme, and language. Only when the project says
+  nothing, fall back to the engine defaults (Conventional Commits): commit & PR title
+  `feat(<ID>): …`, artifacts in the repo's language, no AI-tooling attribution; branch naming in
+  two forms — a **tracker-backed** roadmap uses `<type>/<ITEM-KEY>-<slug>` (`feat/`, `fix/`,
+  `chore/`, `refactor/`); a **slug-named** roadmap (no tracker — id derived per *Interpreting the
+  argument*) groups its items under the roadmap slug as `<type>/<roadmap-slug>/<item-slug>`. The
+  user adjusts at confirm.
 
 ## 5. Detect canonical-doc candidates
 
@@ -211,9 +216,12 @@ in this run, stage and commit exactly them on the current branch:
 
 - The overlay `roadmaps/<id>.md` (and `roadmaps/<id>.ROADMAP.md` if written), plus
   `roadmap.config.md` **only if** you created it this run.
-- `git add <those paths>` then `git commit -m "chore(roadmap): scaffold <id>"` — stage the paths
-  explicitly, never `git add -A`, so you commit only what init wrote. (Substitute the base config
-  message when you created it: `chore(roadmap): set up base config + scaffold <id>`.)
+- `git add <those paths>` then commit — stage the paths explicitly, never `git add -A`, so you
+  commit only what init wrote. **Phrase the message in the project's resolved `## Conventions`
+  commit style** (§4): with the engine default of Conventional Commits that's
+  `chore(roadmap): scaffold <id>` (or `chore(roadmap): set up base config + scaffold <id>` when
+  you created the base this run); a project with a different commit style gets the same intent
+  written its way.
 - Per `autopilot:standards` §5, `branch`/`commit` can lose an index-lock race — retry after a few
   seconds. If the working tree had unrelated staged changes, leave them; only add init's own paths.
 - Pushing is the owner's call; committing is what keeps the roadmap from being lost. Note in the
