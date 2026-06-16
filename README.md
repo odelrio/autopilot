@@ -56,94 +56,94 @@ Confirm it loaded: `/help` should list `/autopilot:init`, `/autopilot:solo`, and
 
 ## Quickstart
 
-1. **Scaffold your config.** From your repository root:
+1. **Start your first initiative.** From your repository root:
 
    ```
-   /autopilot:init
+   /autopilot:init redesign the onboarding flow
    ```
 
-   It autodetects what your repo already reveals — code host (GitHub/GitLab), build gate,
-   base branch, likely canonical docs — shows you what it found, lets you correct anything,
-   then writes `roadmap.config.md` (and a starter `ROADMAP.md` if you pick the Markdown
-   checklist source). `init` is the **only** autopilot command that asks you questions;
-   `solo` and `fleet` never do. It won't overwrite an existing `roadmap.config.md` — and
-   `/autopilot:init TICKET-101` instead scaffolds an epic overlay (see *Multiple roadmaps* below).
+   `init` sets up the project's shared **base** — autodetecting code host (GitHub/GitLab), build
+   gate, base branch, likely canonical docs, shown for you to correct — then scaffolds the
+   initiative as an overlay `roadmaps/<id>.md`. The argument is free-form (a ticket key, an
+   intent, or a full source description; bare `/autopilot:init` infers from the conversation) —
+   *the more you say, the fewer questions it asks*. `init` is the **only** command that asks you
+   questions and always confirms before writing; it never overwrites an existing base or overlay.
+   See *Example prompts* below.
 
-2. **Fill the TODOs it leaves.** A few sections only you can supply — chiefly `## Queue`
-   (your dependency-ordered work and the fleet's lane surfaces), `## Reserved decisions`, and
-   the optional `## Spec gate`. See `docs/config-schema.md` for what each section means.
+2. **Fill the TODOs it leaves** in the initiative overlay — chiefly `## Queue` (your
+   dependency-ordered work and the fleet's lane surfaces) and `## Reserved decisions`. See
+   `docs/config-schema.md` for what each section means.
 
-3. **Run.**
-   - **Single agent:** `/autopilot:solo` — works the queue one item at a time, posting one
+3. **Run the initiative.**
+   - **Single agent:** `/autopilot:solo <id>` — works the queue one item at a time, posting one
      line per item, until a stop condition.
-   - **Parallel:** `/autopilot:fleet` — claims one item per lane, spawns a worktree subagent
+   - **Parallel:** `/autopilot:fleet <id>` — claims one item per lane, spawns a worktree subagent
      for each, and merges through a strictly-serial queue.
    - **Unattended to completion:** launch either on a loop. It ends itself at mission
      complete and does not reschedule.
 
 ## Example prompts
 
-These are **illustrative examples, not required steps** — copy whichever fits your setup. The
-three slash commands are the whole interface; what varies between projects is the **roadmap
-source** (where work items live), which `init` captures in `## Source binding`.
+These are **illustrative examples, not required steps** — copy whichever fits. The three slash
+commands are the whole interface; you work by **initiatives**, and `/autopilot:init` starts one.
 
-**Set up the config (run once).** `init` autodetects your code host and build gate, then asks
-where work lives — answer in plain language and it writes the matching binding:
+**Start an initiative — `/autopilot:init`.** The normal way to work. `init` sets up the project's
+shared plumbing (code host, build gate, review, conventions) the first time and reuses it
+afterward, then scaffolds the initiative. The argument is free-form — **the more you tell it, the
+fewer questions it asks**; it infers the rest from the repo and the conversation and always
+confirms before writing.
 
 ```
 /autopilot:init
 ```
-
-Sample answers when it asks for the source (heaviest to lightest — pick one):
-
-```
-work items are subtasks of Jira epic TICKET-101, via acli; the epic's comments are the log
-work items are GitHub issues labeled "roadmap"; the tracking issue is the log
-my roadmap is the change specs under openspec/changes/ — one item per change folder
-my roadmap is the checklist in PRODUCT.md
-```
-
-Bindings for each live in `examples/bindings/` (`jira.md`, `github-issues.md`, `markdown.md`).
-
-**Start an epic overlay (only if one repo carries several roadmaps).** By ticket, or by intent
-when there's no ticket — `init` confirms the resolved id before writing:
+Infer the initiative from the conversation; confirm, or ask what it can't tell.
 
 ```
 /autopilot:init TICKET-101
+```
+A tracker key → a tracker-backed initiative; infers which tracker (Jira / GitHub / GitLab) and confirms.
+
+```
 /autopilot:init redesign the onboarding flow
 ```
-
-The first uses the tracker key verbatim (`roadmaps/TICKET-101.md`); the second has no ticket, so
-`init` distills your text into a kebab-case slug (`roadmaps/onboarding-redesign.md`).
-
-**Run a roadmap.** Launch either on a loop to run unattended to completion:
+No ticket → distills a slug (`roadmaps/onboarding-redesign.md`) and starts planning the initiative.
 
 ```
-/autopilot:solo
-/autopilot:solo TICKET-101
+/autopilot:init work items are subtasks of Jira epic TICKET-101, via acli; the epic's comments are the log
+```
+Same as `TICKET-101`, but the pre-stated source skips those questions.
+
+```
+/autopilot:init my roadmap is the change specs under openspec/changes/ — one item per change folder
+```
+Likewise: a spec-file source (openspec-style), described up front.
+
+Source bindings live in `examples/bindings/` (`jira.md`, `github-issues.md`, `markdown.md`).
+
+**Run an initiative — `/autopilot:solo` / `/autopilot:fleet`.** Launch either on a loop to run
+unattended to completion:
+
+```
+/autopilot:solo onboarding-redesign
 /autopilot:fleet onboarding-redesign
 ```
+The id is the initiative — a ticket key or a derived slug (bare `solo`/`fleet` run the only
+initiative if there's just one). `fleet` parallelizes lanes through the strictly-serial merge queue.
 
-Bare `solo`/`fleet` run the single roadmap; with an id they run that overlay — a ticket key or a
-derived slug. `fleet` parallelizes lanes through the strictly-serial merge queue.
+## How initiatives are stored
 
-## Multiple roadmaps in one repo
+Each initiative is an **overlay** on a shared **base**; a repo accumulates as many as it needs.
 
-One repo can run several independent roadmaps (one per initiative/epic). The config splits into
-a shared **base** and per-epic **overlays**:
+- `roadmap.config.md` (root) — the project **base**: shared plumbing (code host, verify gate,
+  review ritual, conventions). No source or queue of its own.
+- `roadmaps/<id>.md` — an **initiative**: its own `## Source binding` and `## Queue` (plus optional
+  overrides). The effective config is base + overlay, section-level override.
 
-- `roadmap.config.md` (root) — the project base: code host, verify gate, review ritual,
-  conventions.
-- `roadmaps/<ID>.md` — an epic overlay: that epic's `## Source binding` and `## Queue` (plus
-  optional overrides). The effective config is base + overlay, section-level override.
-
-Scaffold a new epic with `/autopilot:init TICKET-101`, then run it with `/autopilot:solo TICKET-101`
-or `/autopilot:fleet TICKET-101`. The id need **not** be a ticket: with no tracker key, `init`
-derives a kebab-case slug from your free-text intent or the conversation (e.g. `redesign onboarding`
-→ `roadmaps/onboarding-redesign.md`), confirming it first; that slug then also groups the
-roadmap's branches as `<type>/<roadmap-slug>/<item-slug>`. With no `roadmaps/` directory the root
-file is simply the single roadmap, exactly as before — overlays are additive. Full rules:
-`docs/config-schema.md` → *One roadmap or several*. One epic runs per `solo`/`fleet` invocation.
+`/autopilot:init` sets up the base once and scaffolds each initiative (see *Example prompts*); the
+id is a ticket key or a slug it derives from your intent, which also groups the initiative's
+branches as `<type>/<roadmap-slug>/<item-slug>`. One initiative runs per `solo`/`fleet` invocation.
+(Legacy: a root config that carries its own source + queue still runs as a single roadmap.) Full
+rules: `docs/config-schema.md` → *The model*.
 
 Two roadmaps may run **at the same time** (two agents, one epic each — a per-roadmap session
 marker blocks two runs on the *same* roadmap). To keep their merges from racing, give each

@@ -1,27 +1,29 @@
 ---
-description: Scaffold this project's roadmap.config.md — autodetect the stack (code host, build gate, base branch), confirm, then write the config (and a starter ROADMAP.md when the source is a Markdown checklist).
+description: Start a roadmap initiative — set up the shared base (code host, build gate, conventions) the first time, then scaffold the initiative as an overlay (its own source + queue). Autodetects the stack and confirms before writing.
 ---
 
-Set up autopilot for the current repository. Load and run the **`autopilot:init`** skill, which
-autodetects what the repo already reveals, confirms every choice with you, and writes
-`roadmap.config.md` from the plugin's packaged templates.
+Start a roadmap **initiative** in the current repository. Load and run the **`autopilot:init`**
+skill, which autodetects what the repo reveals, confirms every choice with you, and writes from
+the plugin's packaged templates. It does two things: sets up the project's shared **base**
+(`roadmap.config.md` — code host, verify gate, review ritual, conventions) the first time and
+reuses it after, then scaffolds the **initiative** as an overlay `roadmaps/<id>.md` (its own
+source + queue). Working by initiatives is the normal way; a repo accumulates as many as it needs.
 
 This is the one interactive autopilot command — unlike `/autopilot:solo` and `/autopilot:fleet`,
-`init` is allowed to ask you questions before it writes anything.
+`init` may ask you questions before writing, and it always confirms the resolved initiative id
+first.
 
-Two ways to run it:
+The argument is **free-form — the more you say, the fewer questions it asks** (it infers the rest
+from the repo and the conversation):
 
-- **`/autopilot:init`** — first-time setup: autodetect and scaffold the project base
-  `roadmap.config.md`. If a base already exists, it reports that and stops rather than
-  overwriting your config.
-- **`/autopilot:init <id-or-intent>`** — with a base already present, scaffold a new **epic
-  overlay** (its own source binding and queue, reusing the base's code host, verify gate, and
-  conventions). The argument is the roadmap id, and it need **not** be a ticket:
-  - a **tracker key** (`/autopilot:init TICKET-101`) is used verbatim → `roadmaps/TICKET-101.md`;
-  - **free-text intent** (`/autopilot:init redesign the onboarding flow`) — or, with no argument,
-    intent already clear from the conversation — is distilled into a short kebab-case slug
-    (`onboarding-redesign`) → `roadmaps/onboarding-redesign.md`.
+- `/autopilot:init` — infer the initiative from the conversation; confirm, or ask what it can't tell.
+- `/autopilot:init TICKET-101` — a tracker-backed initiative; infers which tracker and confirms.
+- `/autopilot:init redesign the onboarding flow` — no ticket; distills a kebab-case slug
+  (`roadmaps/onboarding-redesign.md`) and starts planning the initiative.
+- `/autopilot:init work items are subtasks of Jira epic TICKET-101 via acli; the epic's comments are the log`
+  — same as the ticket case, but the pre-stated source saves the source questions.
+- `/autopilot:init my roadmap is the change specs under openspec/changes/ — one item per change folder`
+  — likewise: a spec-file source described up front.
 
-  Either way `init` **proposes the resolved id and waits for your confirmation** before writing.
-  The epic then runs via `/autopilot:solo <id>` or `/autopilot:fleet <id>`. See
-  `docs/config-schema.md` → *One roadmap or several*. It won't overwrite an existing overlay.
+The initiative then runs via `/autopilot:solo <id>` or `/autopilot:fleet <id>`. See
+`docs/config-schema.md` for the full model. `init` never overwrites an existing base or overlay.
