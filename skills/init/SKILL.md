@@ -9,13 +9,33 @@ Generate a project's **`roadmap.config.md`** (and, when the source is a Markdown
 starter **`ROADMAP.md`**) by detecting what the repository already tells you and confirming the
 rest with the user.
 
-This skill has **two modes**, chosen by what already exists and whether you were given an id:
+This skill has **two modes**, chosen by what already exists and whether you have a roadmap to name:
 
 - **Base mode** — no `roadmap.config.md` yet: scaffold the project base (§§1–9 below).
-- **Overlay mode** — a base already exists **and** you were invoked with an id
-  (`/autopilot:init BRU-101`): scaffold a new epic overlay `roadmaps/<ID>.md` instead of
-  stopping (§10). A base existing with **no** id still stops and reports (§0), so a bare
-  re-run never regenerates the base by surprise.
+- **Overlay mode** — a base already exists **and** you have a roadmap to name: either an argument
+  (a tracker key like `TICKET-101`, or free-text intent like `/autopilot:init redesign onboarding`)
+  or intent already clear from the conversation. Scaffold a new epic overlay `roadmaps/<id>.md`
+  instead of stopping (§10); the id is resolved per *Resolving the roadmap id* below. A base
+  existing with **no** argument and **no** discernible intent still stops and reports (§0), so a
+  bare re-run never regenerates the base by surprise.
+
+## Resolving the roadmap id
+
+The overlay's id is its filename stem and the argument later passed to `/autopilot:solo` /
+`/autopilot:fleet`. It does **not** have to be a tracker ticket:
+
+- **Tracker key** — an argument shaped like a tracker id (e.g. `TICKET-101`, `ABC-42`): use it
+  **verbatim**. This is also the key the source binding substitutes (e.g. the Jira epic).
+- **Derived slug** — free-text intent after the command (`/autopilot:init redesign the onboarding
+  flow`), or — with no argument — the initiative already clear from the conversation: distill it
+  into a short, lowercase, kebab-case slug (`onboarding-redesign`), 2–4 words, ASCII, no ticket
+  prefix.
+- Always **propose the resolved id at the confirm step and let the user edit it** — never write a
+  file named from a guess without confirmation. If there is neither an argument nor any clear
+  conversational intent, do not invent one: fall back to §0 (stop and report).
+
+A slug-named roadmap has no tracker, so its source is the Markdown checklist (or another
+file-based source) and its items carry no tracker keys — which changes branch naming (see §4).
 
 This is the **only** interactive, human-in-the-loop autopilot command, and the **only** place
 besides `examples/bindings/` where naming real tools (`git`, `gh`, `glab`, `make`, …) is
@@ -46,10 +66,12 @@ The files you read (sources of truth — never edit them, only copy from them):
 
 - Must be inside a git work tree (`git rev-parse --is-inside-work-tree`). If not, stop and say so.
 - Existing `roadmap.config.md` at the repo root decides the mode:
-  - invoked **with an id** (`/autopilot:init BRU-101`) → **overlay mode**, jump to §10 (do not
-    touch the base).
-  - invoked **with no id** → **stop and report** — do not overwrite. Only regenerate the base
-    if the user explicitly asks; even then, show what you'd change first.
+  - invoked **with an id or intent** — a tracker key, free-text intent, or intent already clear
+    from the conversation (*Resolving the roadmap id* above) → **overlay mode**, jump to §10 (do
+    not touch the base).
+  - invoked **with no argument and no discernible intent** → **stop and report** — do not
+    overwrite. Only regenerate the base if the user explicitly asks; even then, show what you'd
+    change first.
 - No `roadmap.config.md` yet → **base mode**, continue with §1 — regardless of whether an id was
   given. There is no base yet to layer an overlay onto, so an id here is at most a naming hint
   for the base; never branch into overlay mode without an existing base. (Overlays come later,
@@ -91,9 +113,11 @@ Scan the repo root for build manifests, first match wins; propose the command, l
 
 - Base branch: `git symbolic-ref refs/remotes/origin/HEAD` (fall back to whichever of `main` /
   `master` exists).
-- Conventions: propose the engine defaults — branch `feat/<ID>-<slug>` (`fix/`, `chore/`,
-  `refactor/`), commit & PR title `feat(<ID>): …`, artifacts in the repo's language, no
-  AI-tooling attribution. The user adjusts at confirm.
+- Conventions: propose the engine defaults — commit & PR title `feat(<ID>): …`, artifacts in the
+  repo's language, no AI-tooling attribution. Branch naming has two forms: a **tracker-backed**
+  roadmap uses `<type>/<ITEM-KEY>-<slug>` (`feat/`, `fix/`, `chore/`, `refactor/`); a
+  **slug-named** roadmap (no tracker — id derived per *Resolving the roadmap id*) groups its items
+  under the roadmap slug as `<type>/<roadmap-slug>/<item-slug>`. The user adjusts at confirm.
 
 ## 5. Detect canonical-doc candidates
 
@@ -139,8 +163,10 @@ schema of every section.
 You were invoked as `/autopilot:init <ID>` with a `roadmap.config.md` already present. Scaffold
 an **epic overlay**, reusing the base for everything project-wide. Do not edit the base.
 
-1. **Resolve `<ID>`** from the argument (e.g. `BRU-101`); the overlay path is `roadmaps/<ID>.md`.
-   If it already exists, **stop and report** — never overwrite an overlay (same rule as the base).
+1. **Resolve the roadmap id** per *Resolving the roadmap id* above — a tracker key used verbatim,
+   or a slug derived from the argument's free text / the conversation intent (kebab-case,
+   confirmed). The overlay path is `roadmaps/<id>.md`. If it already exists, **stop and report** —
+   never overwrite an overlay (same rule as the base).
 2. **Read the base** `roadmap.config.md` to confirm the shared sections (`## Code-host binding`,
    `## Verify`, `## Review ritual`, `## Conventions`) the overlay will inherit. The overlay does
    **not** repeat them.
@@ -150,7 +176,7 @@ an **epic overlay**, reusing the base for everything project-wide. Do not edit t
 4. **Confirm** (the `init` "+ confirm"): show the id, the overlay path, the chosen source, and
    that host/verify/review/conventions are inherited from the base. Do not write until confirmed.
 5. **Write `roadmaps/<ID>.md`** with only the overlay sections, following
-   `examples/roadmaps/BRU-101.md`:
+   `examples/roadmaps/TICKET-101.md`:
    - `## Source binding` — paste the chosen source binding's verb table verbatim, substituting
      this epic's ids.
    - `## Queue` — a `<!-- TODO: dependency-ordered work for <ID> + fleet lane surfaces -->`

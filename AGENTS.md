@@ -74,8 +74,10 @@ Consumers drop a `roadmap.config.md` at their repo root. Start from
 `roadmap.config.md` holds the project-wide sections (host, verify, review, conventions); each
 epic adds an overlay `roadmaps/<ID>.md` with its own `## Source binding` and `## Queue`. The
 effective config is base ⊕ overlay (section-level override, overlay wins); `/autopilot:solo
-<ID>` / `/autopilot:fleet <ID>` select the epic. With no `roadmaps/`, the root file is the
-single roadmap. Start from `examples/roadmaps/BRU-101.md`; full rules in
+<ID>` / `/autopilot:fleet <ID>` select the epic. `<ID>` is a tracker key, or a kebab-case slug
+`init` derives from free-text intent / the conversation when there is no ticket (confirmed before
+writing). With no `roadmaps/`, the root file is the single roadmap. Start from
+`examples/roadmaps/TICKET-101.md`; full rules in
 `docs/config-schema.md` → *One roadmap or several*. Two roadmaps may run **concurrently** (one
 agent each; a per-roadmap session marker blocks two runs on the same roadmap) — give each its own
 **integration branch** so their serial merge queues never share a branch, with a single

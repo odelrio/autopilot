@@ -14,8 +14,14 @@ Two ways to run it:
 - **`/autopilot:init`** — first-time setup: autodetect and scaffold the project base
   `roadmap.config.md`. If a base already exists, it reports that and stops rather than
   overwriting your config.
-- **`/autopilot:init <ID>`** (e.g. `/autopilot:init BRU-101`) — with a base already present,
-  scaffold a new **epic overlay** `roadmaps/<ID>.md` (its own source binding and queue, reusing
-  the base's code host, verify gate, and conventions). The epic then runs via
-  `/autopilot:solo <ID>` or `/autopilot:fleet <ID>`. See `docs/config-schema.md` →
-  *One roadmap or several*. It won't overwrite an existing overlay.
+- **`/autopilot:init <id-or-intent>`** — with a base already present, scaffold a new **epic
+  overlay** (its own source binding and queue, reusing the base's code host, verify gate, and
+  conventions). The argument is the roadmap id, and it need **not** be a ticket:
+  - a **tracker key** (`/autopilot:init TICKET-101`) is used verbatim → `roadmaps/TICKET-101.md`;
+  - **free-text intent** (`/autopilot:init redesign the onboarding flow`) — or, with no argument,
+    intent already clear from the conversation — is distilled into a short kebab-case slug
+    (`onboarding-redesign`) → `roadmaps/onboarding-redesign.md`.
+
+  Either way `init` **proposes the resolved id and waits for your confirmation** before writing.
+  The epic then runs via `/autopilot:solo <id>` or `/autopilot:fleet <id>`. See
+  `docs/config-schema.md` → *One roadmap or several*. It won't overwrite an existing overlay.

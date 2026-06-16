@@ -25,8 +25,11 @@ initiative/epic). The config splits accordingly:
   `## Reserved decisions`, and optional overrides of `## Canonical docs`, `## Spec gate`,
   `## Conventions`, and — when the roadmap runs concurrently on its own integration branch —
   `## Code-host binding` (to retarget `branch`/`open-pr`/`merge` at that branch; see *Concurrent
-  roadmaps and integration branches* below). `<ID>` (e.g. `BRU-101`) is both the filename stem and the argument you pass
-  to `/autopilot:solo`, `/autopilot:fleet`, and `/autopilot:init`. When the overlay's source is
+  roadmaps and integration branches* below). `<ID>` (e.g. `TICKET-101`) is both the filename stem and the argument you pass
+  to `/autopilot:solo`, `/autopilot:fleet`, and `/autopilot:init`. It is a **tracker key** when one
+  exists, or a short **kebab-case slug** that `init` derives from your intent when there is no
+  ticket (`/autopilot:init redesign onboarding` → `roadmaps/onboarding-redesign.md`); `init`
+  always confirms the resolved id before writing. When the overlay's source is
   the Markdown checklist (no tracker), that epic's checklist lives beside it at
   `roadmaps/<ID>.ROADMAP.md` — the per-epic counterpart of a single-roadmap repo's root
   `ROADMAP.md`.
@@ -115,7 +118,9 @@ sections stay in the base.
    but naming the reviewers here makes it concrete).
 
 5. **`## Conventions`** — branch naming, commit message format, PR template, and any
-   house rules (no AI attribution, language, etc.).
+   house rules (no AI attribution, language, etc.). Branch naming has two forms: a tracker-backed
+   roadmap uses `<type>/<ITEM-KEY>-<slug>`; a slug-named roadmap (no tracker) groups its items
+   under the roadmap slug as `<type>/<roadmap-slug>/<item-slug>`.
 
 6. **`## Reserved decisions`** — the classes of decision reserved to a human, how to tag a
    pending item, and what the engine builds around them. Empty is allowed.
@@ -188,4 +193,4 @@ This keeps `solo`/`fleet` non-interactive: an ambiguous launch fails fast with t
 the same way a missing config does.
 
 Start from `examples/roadmap.config.example.md` (single-roadmap base) and, for a multi-roadmap
-repo, `examples/roadmaps/BRU-101.md` (overlay). Replace each binding with your project's tools.
+repo, `examples/roadmaps/TICKET-101.md` (overlay). Replace each binding with your project's tools.

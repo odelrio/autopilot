@@ -45,7 +45,7 @@ initiative/epic). The config splits accordingly:
 - **`roadmaps/<ID>.md` — an epic overlay** *(optional)*. Holds what is specific to one
   initiative: `## Source binding` and `## Queue` (both **required** in an overlay), plus
   `## Reserved decisions`, and optional overrides of `## Canonical docs`, `## Spec gate`, and
-  `## Conventions`. `<ID>` (e.g. `BRU-101`) is both the filename stem and the argument you pass
+  `## Conventions`. `<ID>` (e.g. `TICKET-101`) is both the filename stem and the argument you pass
   to `/autopilot:solo`, `/autopilot:fleet`, and `/autopilot:init`.
 
 **Composition is section-level override.** The *effective config* for a roadmap is the base,
@@ -116,7 +116,7 @@ This keeps `solo`/`fleet` non-interactive: an ambiguous launch fails fast with t
 the same way a missing config does.
 
 Start from `examples/roadmap.config.example.md` (single-roadmap base) and, for a multi-roadmap
-repo, `examples/roadmaps/BRU-101.md` (overlay). Replace each binding with your project's tools.
+repo, `examples/roadmaps/TICKET-101.md` (overlay). Replace each binding with your project's tools.
 ```
 
 - [ ] **Step 4: Verify the edits landed and are self-consistent.**
@@ -430,7 +430,7 @@ This skill has **two modes**, chosen by what already exists and whether you were
 
 - **Base mode** — no `roadmap.config.md` yet: scaffold the project base (§§1–9 below).
 - **Overlay mode** — a base already exists **and** you were invoked with an id
-  (`/autopilot:init BRU-101`): scaffold a new epic overlay `roadmaps/<ID>.md` instead of
+  (`/autopilot:init TICKET-101`): scaffold a new epic overlay `roadmaps/<ID>.md` instead of
   stopping (§10). A base existing with **no** id still stops and reports (§0), so a bare
   re-run never regenerates the base by surprise.
 ```
@@ -446,7 +446,7 @@ Replace with:
 
 ```
 - Existing `roadmap.config.md` at the repo root decides the mode:
-  - invoked **with an id** (`/autopilot:init BRU-101`) → **overlay mode**, jump to §10 (do not
+  - invoked **with an id** (`/autopilot:init TICKET-101`) → **overlay mode**, jump to §10 (do not
     touch the base).
   - invoked **with no id** → **stop and report** — do not overwrite. Only regenerate the base
     if the user explicitly asks; even then, show what you'd change first.
@@ -476,7 +476,7 @@ schema of every section.
 You were invoked as `/autopilot:init <ID>` with a `roadmap.config.md` already present. Scaffold
 an **epic overlay**, reusing the base for everything project-wide. Do not edit the base.
 
-1. **Resolve `<ID>`** from the argument (e.g. `BRU-101`); the overlay path is `roadmaps/<ID>.md`.
+1. **Resolve `<ID>`** from the argument (e.g. `TICKET-101`); the overlay path is `roadmaps/<ID>.md`.
    If it already exists, **stop and report** — never overwrite an overlay (same rule as the base).
 2. **Read the base** `roadmap.config.md` to confirm the shared sections (`## Code-host binding`,
    `## Verify`, `## Review ritual`, `## Conventions`) the overlay will inherit. The overlay does
@@ -487,7 +487,7 @@ an **epic overlay**, reusing the base for everything project-wide. Do not edit t
 4. **Confirm** (the `init` "+ confirm"): show the id, the overlay path, the chosen source, and
    that host/verify/review/conventions are inherited from the base. Do not write until confirmed.
 5. **Write `roadmaps/<ID>.md`** with only the overlay sections, following
-   `examples/roadmaps/BRU-101.md`:
+   `examples/roadmaps/TICKET-101.md`:
    - `## Source binding` — paste the chosen source binding's verb table verbatim, substituting
      this epic's ids.
    - `## Queue` — a `<!-- TODO: dependency-ordered work for <ID> + fleet lane surfaces -->`
@@ -541,7 +541,7 @@ Two ways to run it:
 - **`/autopilot:init`** — first-time setup: autodetect and scaffold the project base
   `roadmap.config.md`. If a base already exists, it reports that and stops rather than
   overwriting your config.
-- **`/autopilot:init <ID>`** (e.g. `/autopilot:init BRU-101`) — with a base already present,
+- **`/autopilot:init <ID>`** (e.g. `/autopilot:init TICKET-101`) — with a base already present,
   scaffold a new **epic overlay** `roadmaps/<ID>.md` (its own source binding and queue, reusing
   the base's code host, verify gate, and conventions). The epic then runs via
   `/autopilot:solo <ID>` or `/autopilot:fleet <ID>`. See `docs/config-schema.md` →
@@ -568,43 +568,43 @@ git commit -m "docs(init): document /autopilot:init <ID> overlay scaffolding"
 ### Task 8: Example overlay under `examples/`
 
 **Files:**
-- Create: `examples/roadmaps/BRU-101.md`
+- Create: `examples/roadmaps/TICKET-101.md`
 - Modify: `examples/roadmap.config.example.md`
 
-- [ ] **Step 1: Create the example overlay.** Write `examples/roadmaps/BRU-101.md`:
+- [ ] **Step 1: Create the example overlay.** Write `examples/roadmaps/TICKET-101.md`:
 
 ```markdown
-# roadmaps/BRU-101.md (example overlay)
+# roadmaps/TICKET-101.md (example overlay)
 
 > An **epic overlay**. Drop overlays at `roadmaps/<ID>.md` in your repo root when one repo runs
 > several roadmaps. It carries only the epic-specific sections; everything project-wide
 > (`## Code-host binding`, `## Verify`, `## Review ritual`, `## Conventions`,
 > `## Environment gotchas`) is inherited from the base `roadmap.config.md`. Run this epic with
-> `/autopilot:solo BRU-101` or `/autopilot:fleet BRU-101`. See `docs/config-schema.md` →
+> `/autopilot:solo TICKET-101` or `/autopilot:fleet TICKET-101`. See `docs/config-schema.md` →
 > *One roadmap or several*.
 
 ## Source binding
 
-Jira via `acli` (see `examples/bindings/jira.md`). Epic `BRU-101` is this roadmap; its
+Jira via `acli` (see `examples/bindings/jira.md`). Epic `TICKET-101` is this roadmap; its
 comments are the decision log.
 
 | Verb           | Command                                                                                   |
 | -------------- | ----------------------------------------------------------------------------------------- |
-| `next-ready`   | First item in `## Queue` order whose deps are `Done`; cross-check with `acli jira workitem list --jql "parent = BRU-101 AND status = 'To Do'"`. |
+| `next-ready`   | First item in `## Queue` order whose deps are `Done`; cross-check with `acli jira workitem list --jql "parent = TICKET-101 AND status = 'To Do'"`. |
 | `claim`        | `acli jira workitem transition --key <KEY> --status "In Progress"`                         |
 | `complete`     | `acli jira workitem transition --key <KEY> --status "Done"`                                |
 | `park`         | transition to `"To Do"` + `note` the reason                                               |
 | `note`         | `acli jira workitem comment create --key <KEY> --body-file <adf.json>`                     |
-| `log-decision` | `note` on `BRU-101`                                                                        |
-| `derive`       | `acli jira workitem create --parent BRU-101 --type Sub-task --summary "..." --description-file <adf.json>` |
+| `log-decision` | `note` on `TICKET-101`                                                                        |
+| `derive`       | `acli jira workitem create --parent TICKET-101 --type Sub-task --summary "..." --description-file <adf.json>` |
 
 ## Queue
 
 Dependency order; `→` is "then", `∥` is "parallelizable". Lanes for the fleet are by surface.
 
 ```
-BRU-102 (schema) → BRU-103 (api) ∥ BRU-104 (web)
-→ BRU-105 (rollout)
+TICKET-102 (schema) → TICKET-103 (api) ∥ TICKET-104 (web)
+→ TICKET-105 (rollout)
 ```
 
 **Fleet lanes (disjoint surfaces, max 3 concurrent):**
@@ -640,7 +640,7 @@ Replace with:
 > the full schema and the verb contract.
 >
 > Running **several roadmaps** in one repo? This file becomes the shared **base** (host, verify,
-> review, conventions) and each epic gets an overlay — see `examples/roadmaps/BRU-101.md` and
+> review, conventions) and each epic gets an overlay — see `examples/roadmaps/TICKET-101.md` and
 > `docs/config-schema.md` → *One roadmap or several*.
 ```
 
@@ -648,14 +648,14 @@ Replace with:
 
 Run:
 ```bash
-test -f examples/roadmaps/BRU-101.md && grep -n "epic overlay\|inherited from the base" examples/roadmaps/BRU-101.md && grep -n "several roadmaps\|examples/roadmaps/BRU-101.md" examples/roadmap.config.example.md
+test -f examples/roadmaps/TICKET-101.md && grep -n "epic overlay\|inherited from the base" examples/roadmaps/TICKET-101.md && grep -n "several roadmaps\|examples/roadmaps/TICKET-101.md" examples/roadmap.config.example.md
 ```
 Expected: overlay file exists with the "epic overlay" header and inheritance note; base example links to it.
 
 - [ ] **Step 4: Commit.**
 
 ```bash
-git add examples/roadmaps/BRU-101.md examples/roadmap.config.example.md
+git add examples/roadmaps/TICKET-101.md examples/roadmap.config.example.md
 git commit -m "docs(examples): add example epic overlay, link from base example"
 ```
 
@@ -692,8 +692,8 @@ a shared **base** and per-epic **overlays**:
 - `roadmaps/<ID>.md` — an epic overlay: that epic's `## Source binding` and `## Queue` (plus
   optional overrides). The effective config is base + overlay, section-level override.
 
-Scaffold a new epic with `/autopilot:init BRU-101`, then run it with `/autopilot:solo BRU-101`
-or `/autopilot:fleet BRU-101`. With no `roadmaps/` directory the root file is simply the single
+Scaffold a new epic with `/autopilot:init TICKET-101`, then run it with `/autopilot:solo TICKET-101`
+or `/autopilot:fleet TICKET-101`. With no `roadmaps/` directory the root file is simply the single
 roadmap, exactly as before — overlays are additive. Full rules:
 `docs/config-schema.md` → *One roadmap or several*. One epic runs per `solo`/`fleet` invocation.
 
@@ -712,7 +712,7 @@ Replace with:
 ```
    checklist source). `init` is the **only** autopilot command that asks you questions;
    `solo` and `fleet` never do. It won't overwrite an existing `roadmap.config.md` — and
-   `/autopilot:init BRU-101` instead scaffolds an epic overlay (see *Multiple roadmaps* below).
+   `/autopilot:init TICKET-101` instead scaffolds an epic overlay (see *Multiple roadmaps* below).
 ```
 
 - [ ] **Step 3: AGENTS.md — update the layer diagram's middle row.** Edit `old_string`:
@@ -753,7 +753,7 @@ Consumers drop a `roadmap.config.md` at their repo root. Start from
 epic adds an overlay `roadmaps/<ID>.md` with its own `## Source binding` and `## Queue`. The
 effective config is base ⊕ overlay (section-level override, overlay wins); `/autopilot:solo
 <ID>` / `/autopilot:fleet <ID>` select the epic. With no `roadmaps/`, the root file is the
-single roadmap. Start from `examples/roadmaps/BRU-101.md`; full rules in
+single roadmap. Start from `examples/roadmaps/TICKET-101.md`; full rules in
 `docs/config-schema.md` → *One roadmap or several*.
 ```
 
@@ -781,7 +781,7 @@ Replace with:
 
 Run:
 ```bash
-grep -n "Multiple roadmaps\|roadmaps/<ID>.md\|/autopilot:init BRU-101" README.md
+grep -n "Multiple roadmaps\|roadmaps/<ID>.md\|/autopilot:init TICKET-101" README.md
 grep -n "roadmaps/<ID>.md\|base ⊕ overlay\|Multiple roadmaps" AGENTS.md
 ```
 Expected: README has the new section + the init-overlay note; AGENTS has the diagram update, the writing-config block, and the new invariant.
