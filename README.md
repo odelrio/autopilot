@@ -83,52 +83,49 @@ Confirm it loaded: `/help` should list `/autopilot:init`, `/autopilot:solo`, and
 
 ## Example prompts
 
-Autopilot is driven by three slash commands. What changes between projects is the **roadmap
-source** — where your work items live — which `init` captures in `## Source binding`. Describe
-your source to `init` in plain language and it writes the matching binding.
+These are **illustrative examples, not required steps** — copy whichever fits your setup. The
+three slash commands are the whole interface; what varies between projects is the **roadmap
+source** (where work items live), which `init` captures in `## Source binding`.
 
-**Scaffold the config (run once):**
+**Set up the config (run once).** `init` autodetects your code host and build gate, then asks
+where work lives — answer in plain language and it writes the matching binding:
 
 ```
 /autopilot:init
 ```
 
-…then tell it where work lives. A few sources, from heaviest to lightest:
-
-- **Jira** — *"Work items are subtasks of Jira epic TICKET-101, driven through `acli`; the
-  epic's comments are the decision log."* → see `examples/bindings/jira.md`.
-- **GitHub Issues** — *"Work items are issues labeled `roadmap`; the tracking issue is the
-  log."* → see `examples/bindings/github-issues.md`.
-- **Spec files (openspec-style)** — *"My roadmap is the change specs under `openspec/changes/` —
-  each change folder is one item, `done` when its tasks are checked."* Resolves like the
-  Markdown source, scanning a directory instead of a single file.
-- **A product checklist** — *"My roadmap is the checklist in `PRODUCT.md`."* The lightest
-  source: no tracker, items are `- [ ]` lines. → see `examples/bindings/markdown.md`.
-
-**Scaffold an epic overlay** (when one repo carries several roadmaps) — by ticket **or** by
-intent when there is none:
+Sample answers when it asks for the source (heaviest to lightest — pick one):
 
 ```
-/autopilot:init TICKET-101                    # tracker key → roadmaps/TICKET-101.md
-/autopilot:init redesign the onboarding flow  # no ticket   → roadmaps/onboarding-redesign.md
+work items are subtasks of Jira epic TICKET-101, via acli; the epic's comments are the log
+work items are GitHub issues labeled "roadmap"; the tracking issue is the log
+my roadmap is the change specs under openspec/changes/ — one item per change folder
+my roadmap is the checklist in PRODUCT.md
 ```
 
-*"Set up an overlay for epic TICKET-101 — its own queue and Jira source, inheriting the verify
-gate and review ritual from the base."* · *"Start a roadmap for the onboarding redesign — no
-ticket, derive the name from this."* `init` proposes the resolved id (a tracker key verbatim, or
-a kebab-case slug distilled from your free text or the conversation) and confirms before writing.
+Bindings for each live in `examples/bindings/` (`jira.md`, `github-issues.md`, `markdown.md`).
 
-**Run a roadmap:**
+**Start an epic overlay (only if one repo carries several roadmaps).** By ticket, or by intent
+when there's no ticket — `init` confirms the resolved id before writing:
 
 ```
-/autopilot:solo               # single roadmap, one item at a time
-/autopilot:solo TICKET-101    # a specific epic overlay
-/autopilot:fleet TICKET-101   # parallel lanes + strictly-serial merge queue
+/autopilot:init TICKET-101
+/autopilot:init redesign the onboarding flow
 ```
 
-*"Run the PRODUCT.md roadmap solo until you hit something blocked or reserved."* ·
-*"Fleet the TICKET-101 epic — parallelize the backend and frontend lanes."* Launch either on a
-loop to run unattended to completion.
+The first uses the tracker key verbatim (`roadmaps/TICKET-101.md`); the second has no ticket, so
+`init` distills your text into a kebab-case slug (`roadmaps/onboarding-redesign.md`).
+
+**Run a roadmap.** Launch either on a loop to run unattended to completion:
+
+```
+/autopilot:solo
+/autopilot:solo TICKET-101
+/autopilot:fleet onboarding-redesign
+```
+
+Bare `solo`/`fleet` run the single roadmap; with an id they run that overlay — a ticket key or a
+derived slug. `fleet` parallelizes lanes through the strictly-serial merge queue.
 
 ## Multiple roadmaps in one repo
 
