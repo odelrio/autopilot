@@ -8,7 +8,7 @@ The engine reads this file at the start of every run. Anything the engine needs 
 specific to your project lives here — and **only** here. Keep tool names (`gh`, `acli`,
 `glab`, `make`, …) out of the engine; they belong in this file.
 
-> The fastest way to produce this file is **`/autopilot:init`**, which autodetects your stack
+> The fastest way to produce this file is **`/autopilot:plan`**, which autodetects your stack
 > and writes most of it for you. This document explains every section so you can edit it — or
 > write it from scratch — by hand.
 
@@ -27,14 +27,14 @@ splits in two:
   initiative runs concurrently on its own integration branch — `## Code-host binding` (to retarget
   `branch`/`open-pr`/`merge` at that branch; see *Concurrent roadmaps and integration branches*
   below). `<id>` is both the filename stem and the argument you pass to `/autopilot:solo`,
-  `/autopilot:fleet`, and `/autopilot:init`. It is a **tracker key** when one exists, or a short
-  **kebab-case slug** that `init` derives from your intent when there is no ticket
-  (`/autopilot:init redesign onboarding` → `roadmaps/onboarding-redesign.md`); `init` always
+  `/autopilot:fleet`, and `/autopilot:plan`. It is a **tracker key** when one exists, or a short
+  **kebab-case slug** that `plan` derives from your intent when there is no ticket
+  (`/autopilot:plan redesign onboarding` → `roadmaps/onboarding-redesign.md`); `plan` always
   confirms the resolved id before writing. When the initiative's source is a file-based one
   (Markdown checklist / spec files, no tracker), its checklist lives beside the overlay at
   `roadmaps/<id>.ROADMAP.md`.
 
-A repo accumulates as many initiatives as it needs: `/autopilot:init` sets up the base **once**
+A repo accumulates as many initiatives as it needs: `/autopilot:plan` sets up the base **once**
 (reusing it thereafter) and scaffolds each initiative as an overlay.
 
 **Composition is section-level override.** The *effective config* for an initiative is the base,
