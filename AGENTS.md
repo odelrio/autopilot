@@ -15,7 +15,7 @@ is nothing to compile and no dependencies to install.
 claude --plugin-dir .
 ```
 
-Confirm it loaded: `/help` should list `/autopilot:init`, `/autopilot:solo`, and
+Confirm it loaded: `/help` should list `/autopilot:plan`, `/autopilot:solo`, and
 `/autopilot:fleet`, and the `autopilot:task` / `autopilot:standards` skills should be available.
 
 ## Architecture
@@ -35,7 +35,7 @@ Your repository           the roadmap actually gets executed
 
 | File | Invocation | Role |
 |------|-----------|------|
-| `commands/init.md` + `skills/init/SKILL.md` | `/autopilot:init` | Setup layer: autodetect the stack and scaffold the consumer's `roadmap.config.md` (the one interactive command) |
+| `commands/plan.md` + `skills/plan/SKILL.md` | `/autopilot:plan` | Setup layer: autodetect the stack and scaffold the consumer's `roadmap.config.md` (the one interactive command) |
 | `commands/solo.md` | `/autopilot:solo` | Single-agent: works items one at a time until a stop condition |
 | `commands/fleet.md` | `/autopilot:fleet` | Orchestrator: claims per lane, spawns worktree subagents, runs serial merge queue |
 | `skills/task/SKILL.md` | `autopilot:task` | One roadmap item end-to-end (pick → spec gate → implement → verify → review → PR → merge → bookkeeping) |
@@ -45,8 +45,8 @@ Your repository           the roadmap actually gets executed
 other components, only referenced. `skills/task` and the runtime commands load
 `autopilot:standards` first and defer to it. Similarly, tool names (`gh`, `acli`, `glab`,
 `make`) never appear in the **runtime** engine — they belong in the consuming project's
-`roadmap.config.md`. The deliberate exception is the **setup layer** (`commands/init.md` +
-`skills/init/`): `init` inspects the repo and names real tools to *produce* that config, so it —
+`roadmap.config.md`. The deliberate exception is the **setup layer** (`commands/plan.md` +
+`skills/plan/`): `plan` inspects the repo and names real tools to *produce* that config, so it —
 like `examples/bindings/` — is where tool names legitimately live. It also is the one
 interactive command: `solo` and `fleet` never ask the user anything.
 
@@ -75,7 +75,7 @@ holds project-wide **plumbing** (host, verify, review, conventions) only; each i
 overlay `roadmaps/<id>.md` with its own `## Source binding` and `## Queue`. The effective config
 is base ⊕ overlay (section-level override, overlay wins); `/autopilot:solo <id>` /
 `/autopilot:fleet <id>` select the initiative. `<id>` is a tracker key, or a kebab-case slug
-`init` derives from free-text intent / the conversation when there is no ticket (confirmed before
+`plan` derives from free-text intent / the conversation when there is no ticket (confirmed before
 writing). Start from `examples/roadmaps/TICKET-101.md`; full rules in `docs/config-schema.md` →
 *The model*. (Legacy: a root config carrying its own source + queue still runs as a single
 roadmap.) Two initiatives may run **concurrently** (one agent each; a per-roadmap session marker
@@ -95,7 +95,7 @@ Pre-built binding snippets live in `examples/bindings/` — paste and adjust:
 - The **runtime** engine (`commands/solo`, `commands/fleet`, `skills/task`,
   `skills/standards`) must never name a specific tool (`gh`, `git`, `make`, etc.) — those
   references belong in the consuming project's config, in `examples/bindings/`, or in the
-  **setup layer** (`commands/init.md` + `skills/init/`), which by design inspects the repo and
+  **setup layer** (`commands/plan.md` + `skills/plan/`), which by design inspects the repo and
   names tools to scaffold that config.
 - `skills/task` drives one item; the fleet orchestrator drives the merge queue. This separation
   is load-bearing: fleet subagents do **not** merge — they stop after PR open and triage; the

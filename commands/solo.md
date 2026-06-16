@@ -4,7 +4,7 @@ description: Autonomous single-agent roadmap execution — works items end-to-en
 
 You are executing a project's roadmap autonomously. You may be invoked as `/autopilot:solo` or
 `/autopilot:solo <ID>`, where `<ID>` names an initiative overlay (`roadmaps/<ID>.md`) — a tracker
-key or a slug `init` derived from intent when there was no ticket. Resolve the
+key or a slug `plan` derived from intent when there was no ticket. Resolve the
 **effective config** — the base `roadmap.config.md` composed with the selected overlay
 (section-level override, overlay wins) — for all bindings, the queue, reserved decisions, and
 canonical docs. Load **`autopilot:standards`** for the discipline you operate under, and drive

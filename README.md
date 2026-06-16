@@ -31,7 +31,7 @@ The engine never names a provider. Your config resolves these:
 
 | Component               | Invocation            | Role                                                       |
 | ----------------------- | --------------------- | ---------------------------------------------------------- |
-| `commands/init.md`      | `/autopilot:init`     | Scaffold your `roadmap.config.md` (the one interactive command). |
+| `commands/plan.md`      | `/autopilot:plan`     | Scaffold your `roadmap.config.md` (the one interactive command). |
 | `commands/solo.md`      | `/autopilot:solo`     | Single-agent: works the queue one item at a time.          |
 | `commands/fleet.md`     | `/autopilot:fleet`    | Orchestrator: lanes, worktree subagents, serial merge queue.|
 | `skills/task/`          | `autopilot:task`      | One roadmap item end-to-end.                               |
@@ -48,7 +48,7 @@ From the marketplace:
 /plugin install autopilot@autopilot
 ```
 
-Confirm it loaded: `/help` should list `/autopilot:init`, `/autopilot:solo`, and
+Confirm it loaded: `/help` should list `/autopilot:plan`, `/autopilot:solo`, and
 `/autopilot:fleet`.
 
 > Developing the plugin itself? Run it from a clone without installing: `claude --plugin-dir .`
@@ -59,14 +59,14 @@ Confirm it loaded: `/help` should list `/autopilot:init`, `/autopilot:solo`, and
 1. **Start your first initiative.** From your repository root:
 
    ```
-   /autopilot:init redesign the onboarding flow
+   /autopilot:plan redesign the onboarding flow
    ```
 
-   `init` sets up the project's shared **base** — autodetecting code host (GitHub/GitLab), build
+   `plan` sets up the project's shared **base** — autodetecting code host (GitHub/GitLab), build
    gate, base branch, likely canonical docs, shown for you to correct — then scaffolds the
    initiative as an overlay `roadmaps/<id>.md`. The argument is free-form (a ticket key, an
-   intent, or a full source description; bare `/autopilot:init` infers from the conversation) —
-   *the more you say, the fewer questions it asks*. `init` is the **only** command that asks you
+   intent, or a full source description; bare `/autopilot:plan` infers from the conversation) —
+   *the more you say, the fewer questions it asks*. `plan` is the **only** command that asks you
    questions and always confirms before writing; it never overwrites an existing base or overlay.
    See *Example prompts* below.
 
@@ -85,36 +85,36 @@ Confirm it loaded: `/help` should list `/autopilot:init`, `/autopilot:solo`, and
 ## Example prompts
 
 These are **illustrative examples, not required steps** — copy whichever fits. The three slash
-commands are the whole interface; you work by **initiatives**, and `/autopilot:init` starts one.
+commands are the whole interface; you work by **initiatives**, and `/autopilot:plan` starts one.
 
-**Start an initiative — `/autopilot:init`.** The normal way to work. `init` sets up the project's
+**Start an initiative — `/autopilot:plan`.** The normal way to work. `plan` sets up the project's
 shared plumbing (code host, build gate, review, conventions) the first time and reuses it
 afterward, then scaffolds the initiative. The argument is free-form — **the more you tell it, the
 fewer questions it asks**; it infers the rest from the repo and the conversation and always
 confirms before writing.
 
 ```
-/autopilot:init
+/autopilot:plan
 ```
 Infer the initiative from the conversation; confirm, or ask what it can't tell.
 
 ```
-/autopilot:init TICKET-101
+/autopilot:plan TICKET-101
 ```
 A tracker key → a tracker-backed initiative; infers which tracker (Jira / GitHub / GitLab) and confirms.
 
 ```
-/autopilot:init redesign the onboarding flow
+/autopilot:plan redesign the onboarding flow
 ```
 No ticket → distills a slug (`roadmaps/onboarding-redesign.md`) and starts planning the initiative.
 
 ```
-/autopilot:init work items are subtasks of Jira epic TICKET-101, via acli; the epic's comments are the log
+/autopilot:plan work items are subtasks of Jira epic TICKET-101, via acli; the epic's comments are the log
 ```
 Same as `TICKET-101`, but the pre-stated source skips those questions.
 
 ```
-/autopilot:init my roadmap is the change specs under openspec/changes/ — one item per change folder
+/autopilot:plan my roadmap is the change specs under openspec/changes/ — one item per change folder
 ```
 Likewise: a spec-file source (openspec-style), described up front.
 
@@ -139,7 +139,7 @@ Each initiative is an **overlay** on a shared **base**; a repo accumulates as ma
 - `roadmaps/<id>.md` — an **initiative**: its own `## Source binding` and `## Queue` (plus optional
   overrides). The effective config is base + overlay, section-level override.
 
-`/autopilot:init` sets up the base once and scaffolds each initiative (see *Example prompts*); the
+`/autopilot:plan` sets up the base once and scaffolds each initiative (see *Example prompts*); the
 id is a ticket key or a slug it derives from your intent, which also groups the initiative's
 branches as `<type>/<roadmap-slug>/<item-slug>`. One initiative runs per `solo`/`fleet` invocation.
 (Legacy: a root config that carries its own source + queue still runs as a single roadmap.) Full
@@ -216,7 +216,7 @@ prose. A hook that needs judgment will fire wrong and train the agent to ignore 
 
 ## Config reference
 
-`/autopilot:init` is the fastest way to produce `roadmap.config.md`. To write or tune it by
+`/autopilot:plan` is the fastest way to produce `roadmap.config.md`. To write or tune it by
 hand, see **`docs/config-schema.md`** for the full schema and the verb contract. The
 `examples/bindings/` directory has ready-made bindings:
 
