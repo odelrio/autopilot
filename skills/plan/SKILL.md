@@ -1,6 +1,6 @@
 ---
 name: plan
-description: Plan a roadmap initiative. Sets up the project's shared base (code host, build gate, conventions) the first time, then scaffolds the initiative as an overlay (its own source + queue) — autodetecting and confirming before writing, including whether the initiative runs on mainline or its own integration branch. The one interactive autopilot command; solo and fleet never ask.
+description: Plan a roadmap initiative. Sets up the project's shared base (code host, build gate, conventions) the first time, then scaffolds the initiative as its own roadmap file (its own source + queue) — autodetecting and confirming before writing, including whether the initiative runs on mainline or its own integration branch. The one interactive autopilot command; solo and fleet never ask.
 ---
 
 # Autopilot plan
@@ -9,6 +9,21 @@ description: Plan a roadmap initiative. Sets up the project's shared base (code 
 an **overlay** (`roadmaps/<id>.md`) holding its own `## Source binding` and `## Queue`; the repo's
 shared **base** (`roadmap.config.md` — code host, verify gate, review ritual, conventions) is
 plumbing that plan establishes **once** and every later initiative reuses.
+
+## Talking to the user
+
+`plan` is interactive, so you *do* address the user — but only with: the questions you must ask
+(§§1–6a), the **confirm** summary (§6), and the final **report** (§9). Don't narrate your reads,
+detections, or step-by-step reasoning ("let me read the existing overlays…", "this maps cleanly
+onto…"). That play-by-play is exactly `autopilot:standards` §4's "don't plan aloud" — it applies
+here too; the user wants the questions and the result, not the deliberation.
+
+Speak the **consumer's** vocabulary. The unit of work is an **initiative** — a **roadmap file**
+(`roadmaps/<id>.md`). "Overlay", "base/plumbing", "binding/verb table", "lane/wave" are *our*
+internal words; keep them in your head, never in anything the user reads (questions, confirm,
+report, commit messages, PRs). Say the initiative by id or "the roadmap" — never "the overlay".
+Same rule, verbatim, as `autopilot:standards` §4 — `plan` doesn't load `standards`, so it is
+restated here.
 
 ## What plan does
 
@@ -140,9 +155,9 @@ Look for stakeholder-substitute docs and offer a shortlist (don't invent): `docs
 ## 6. Confirm (the "+ confirm")
 
 Show a compact summary: the **resolved initiative id** (and that you'll write `roadmaps/<id>.md`),
-its source, its **branch target** (§6a), whether the base plumbing already exists or you'll create
-it (and if so: code-host, verify, base branch, canonical docs), and the overlay sections you'll
-leave as TODO (`## Queue`, `## Reserved decisions`). Let the user correct any field — especially
+its source, its **branch target** (§6a), whether the shared base config already exists or you'll
+create it (and if so: code-host, verify, base branch, canonical docs), and the roadmap-file
+sections you'll leave as TODO (`## Queue`, `## Reserved decisions`). Let the user correct any field — especially
 the id. Do not write anything until they confirm.
 
 ## 6a. Choose the branch target (mainline vs integration branch)
@@ -186,12 +201,12 @@ shape from `examples/bindings/markdown.md`). Never overwrite an existing one.
 
 ## 9. Report
 
-State the files written — the initiative overlay `roadmaps/<id>.md` (and the base
+State the files written — the roadmap file `roadmaps/<id>.md` (and the base
 `roadmap.config.md` if you created it this run) — that they were **committed** (§11, not yet
 pushed), and the **branch target**: mainline, or — if an integration branch was chosen (§6a) —
 that `integration/<id>` was created and pushed, the initiative runs there, and a single
 `reconcile` merges it to mainline at mission-complete (solo/fleet keep it fresh by merging
-mainline forward meanwhile). Then what's left: fill the overlay's TODO sections
+mainline forward meanwhile). Then what's left: fill the roadmap file's TODO sections
 (start with `## Queue`), optionally run the README dry-run to sanity-check selection, then run the
 initiative with `/autopilot:solo <id>` (single agent) or `/autopilot:fleet <id>` (parallel). Point
 to `docs/config-schema.md` for the full schema.
@@ -210,7 +225,7 @@ place, freshly written or pre-existing. Reuse the base for everything project-wi
    **not** repeat them.
 3. **Pick the source binding for this initiative** (§2): use what the argument already stated, or
    detect/ask. Each initiative may use a different source than the others.
-4. **Confirm** (the `plan` "+ confirm"): show the id, the overlay path, the chosen source, the
+4. **Confirm** (the `plan` "+ confirm"): show the id, the roadmap-file path, the chosen source, the
    **branch target** (§6a), and that host/verify/review/conventions are inherited from the base.
    Do not write until confirmed.
 5. **Write `roadmaps/<ID>.md`** with only the overlay sections, following
