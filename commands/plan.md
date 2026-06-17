@@ -1,13 +1,13 @@
 ---
-description: Plan a roadmap initiative — set up the shared base (code host, build gate, conventions) the first time, then scaffold the initiative as an overlay (its own source + queue), choosing whether it runs on mainline or its own integration branch. Autodetects the stack and confirms before writing.
+description: Plan a roadmap initiative — set up the shared base (code host, build gate, conventions) the first time, then scaffold the initiative as its own roadmap file (its own source + queue), choosing whether it runs on mainline or its own integration branch. Autodetects the stack and confirms before writing.
 ---
 
 Start a roadmap **initiative** in the current repository. Load and run the **`autopilot:plan`**
 skill, which autodetects what the repo reveals, confirms every choice with you, and writes from
 the plugin's packaged templates. It does two things: sets up the project's shared **base**
 (`roadmap.config.md` — code host, verify gate, review ritual, conventions) the first time and
-reuses it after, then scaffolds the **initiative** as an overlay `roadmaps/<id>.md` (its own
-source + queue). Working by initiatives is the normal way; a repo accumulates as many as it needs.
+reuses it after, then scaffolds the **initiative** as its own roadmap file `roadmaps/<id>.md` (its
+own source + queue). Working by initiatives is the normal way; a repo accumulates as many as it needs.
 
 This is the one interactive autopilot command — unlike `/autopilot:solo` and `/autopilot:fleet`,
 `plan` may ask you questions before writing, and it always confirms the resolved initiative id
@@ -26,4 +26,4 @@ from the repo and the conversation):
   — likewise: a spec-file source described up front.
 
 The initiative then runs via `/autopilot:solo <id>` or `/autopilot:fleet <id>`. See
-`docs/config-schema.md` for the full model. `plan` never overwrites an existing base or overlay.
+`docs/config-schema.md` for the full model. `plan` never overwrites an existing base or roadmap file.
