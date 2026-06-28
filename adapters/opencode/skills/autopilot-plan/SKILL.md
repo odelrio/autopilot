@@ -1,0 +1,283 @@
+---
+name: autopilot-plan
+description: OpenCode adapter — plan a roadmap initiative. Sets up the project shared base (code host, build gate, conventions) the first time, then scaffolds the initiative as its own roadmap file (its own source + queue) — autodetecting and confirming before writing, including whether the initiative runs on mainline or its own integration branch. The one interactive autopilot command; solo and fleet never ask.
+---
+
+# Autopilot plan
+
+`plan` is how you **start a roadmap initiative** — the normal unit of work. Every initiative is
+an **overlay** (`roadmaps/<id>.md`) holding its own `## Source binding` and `## Queue`; the repo's
+shared **base** (`roadmap.config.md` — code host, verify gate, review ritual, conventions) is
+plumbing that plan establishes **once** and every later initiative reuses.
+
+## Talking to the user
+
+`plan` is interactive, so you *do* address the user — but only with: the questions you must ask
+(§§1–6a), the **confirm** summary (§6), and the final **report** (§9). Don't narrate your reads,
+detections, or step-by-step reasoning ("let me read the existing overlays…", "this maps cleanly
+onto…"). That play-by-play is exactly `autopilot-standards` §4's "don't plan aloud" — it applies
+here too; the user wants the questions and the result, not the deliberation.
+
+Speak the **consumer's** vocabulary. The unit of work is an **initiative** — a **roadmap file**
+(`roadmaps/<id>.md`). "Overlay", "base/plumbing", "binding/verb table", "lane/wave" are *our*
+internal words; keep them in your head, never in anything the user reads (questions, confirm,
+report, commit messages, PRs). Say the initiative by id or "the roadmap" — never "the overlay".
+Same rule, verbatim, as `autopilot-standards` §4 — `plan` doesn't load `standards`, so it is
+restated here.
+
+## What plan does
+
+One run does up to two things, detecting what it can and confirming the rest:
+
+1. **Ensure the base plumbing exists** — if there is no `roadmap.config.md`, detect the stack and
+   write it (§§1, 3–5, 7). If it already exists, leave it untouched and reuse it.
+2. **Create the initiative overlay** — resolve the initiative from the argument (below), pick its
+   source (§2), and write `roadmaps/<id>.md` (§10). This always happens; it is the point of the run.
+
+(Legacy: a `roadmap.config.md` that itself carries `## Source binding` + `## Queue` still runs as a
+single roadmap — the engine reads it — but new initiatives scaffold as overlays.)
+
+## Interpreting the argument
+
+`/autopilot-plan [argument]` takes a **free-form** argument describing the initiative — *the more
+you say, the fewer questions plan asks*. It infers the rest from the repo and this conversation,
+and **always proposes what it resolved and confirms before writing** (never names a file from a
+guess). The spectrum:
+
+- **Nothing** (`/autopilot-plan`) — infer the initiative from the conversation; confirm it, or ask
+  what you can't tell. With no argument *and* no discernible intent (and a base already present),
+  stop and report rather than guess.
+- **A tracker key** (`/autopilot-plan TICKET-101`) — a tracker-backed initiative. Infer *which*
+  tracker from the repo (Jira / GitHub Issues / GitLab) and confirm; use the key verbatim as the
+  overlay id and as the key the source binding substitutes.
+- **Free-text intent** (`/autopilot-plan redesign the onboarding flow`) — distill it into a short,
+  lowercase, kebab-case slug (`onboarding-redesign`; 2–4 words, ASCII, no ticket prefix) as the
+  overlay id, and start planning the initiative. A slug-named initiative has no tracker, so its
+  source is a file-based one (Markdown checklist, spec files) and its items carry no tracker keys —
+  which changes branch naming (see §4).
+- **A source description** (`/autopilot-plan work items are subtasks of Jira epic TICKET-101 via
+  acli; the epic's comments are the log`, or `… the change specs under openspec/changes/, one item
+  per change folder`) — the tracker/intent case **plus** a pre-stated source, so plan skips §2's
+  questions and fills the binding directly. Derive the overlay id from the key or the intent in
+  the description.
+
+This is the **only** interactive, human-in-the-loop autopilot command, and the **only** place
+besides `examples/bindings/` where naming real tools (`git`, `gh`, `glab`, `make`, …) is
+sanctioned: `plan` is the setup layer that *produces* the project's binding config by inspecting
+the repo, not the runtime engine (`solo`/`fleet`/`task`/`standards`), which stays tool-agnostic.
+`$autopilot-solo` and `$autopilot-fleet` never ask the user anything; `plan` is setup-time and
+explicitly does. Detect what you can, ask for the rest, and **always confirm before writing**.
+
+## Locating the bundled templates
+
+You materialize the project config from Autopilot's packaged examples. In the OpenCode adapter,
+the install instructions copy those examples into an adapter support directory next to the
+installed skills and commands — not into the consuming project's source tree.
+
+- Preferred path: resolve this skill's own directory, then read templates from
+  `../../autopilot/examples/` relative to it. With the documented repo-local install, that is
+  `.opencode/autopilot/examples/`; with the documented global install, that is
+  `~/.config/opencode/autopilot/examples/`.
+- Development fallback: when running from the Autopilot checkout itself, use the repository's
+  `examples/` directory.
+- If neither path exists, stop and report that the adapter support examples were not installed;
+  do not invent a config from memory.
+
+The files you read (sources of truth — never edit them, only copy from them):
+
+- `examples/roadmap.config.example.md` — the section structure to follow.
+- `examples/bindings/{jira,github-issues,markdown}.md` — roadmap-source verb tables.
+- `examples/bindings/{github,gitlab}.md` — code-host verb tables.
+
+## 0. Preconditions
+
+- Must be inside a git work tree (`git rev-parse --is-inside-work-tree`). If not, stop and say so.
+- **Resolve the initiative** from the argument (*Interpreting the argument* above). If there is
+  neither an argument nor any clear conversational intent **and** a base already exists, stop and
+  report (what is set up, and that plan needs an initiative to scaffold) — don't guess.
+- **Base plumbing:** if `roadmap.config.md` is missing, you will create it (§§1, 3–5, 7) as part
+  of this run; if it exists, reuse it untouched. Never overwrite an existing base — regenerate it
+  only if the user explicitly asks, showing the diff first.
+- **The overlay:** the initiative is written to `roadmaps/<id>.md` (§10). If that file already
+  exists, **stop and report** — never overwrite an overlay.
+
+## 1. Detect the code-host
+
+From `git remote get-url origin` (fall back to `git remote -v`):
+
+- host contains `github.com` → **GitHub** (`gh`), use `examples/bindings/github.md`.
+- host contains `gitlab` → **GitLab** (`glab`), use `examples/bindings/gitlab.md`.
+- no remote / something else → ask the user which of the two to use.
+
+## 2. Detect the initiative's source
+
+This picks the source binding for the **initiative overlay**. If the argument already described
+the source (*Interpreting the argument*), use that and skip the questions. Otherwise detect —
+repository signals are weak here, so lean on the confirm step:
+
+- A **tracker key** argument → a tracker source; infer which from the remote (`gh` → GitHub
+  Issues; GitLab remote → GitLab; otherwise ask — Jira has no repo signal).
+- A spec/checklist location the intent names (e.g. `openspec/changes/`, an existing `ROADMAP.md`)
+  → **file-based source** (`examples/bindings/markdown.md`, adapted to scan a directory).
+- Default when nothing is detected: **Markdown** (zero external tooling). Always let the user pick
+  among {Jira, GitHub Issues, Markdown / file-based} at the confirm step.
+
+## 3. Detect the verify gate
+
+Scan the repo root for build manifests, first match wins; propose the command, let the user edit:
+
+- `Makefile` with a `ci:` target → `make ci`
+- `package.json` → the present scripts among `lint`, `test`, `build` (e.g. `npm ci && npm run lint && npm test && npm run build`)
+- `Cargo.toml` → `cargo clippy --all-targets && cargo test`
+- `pyproject.toml` / `tox.ini` / `noxfile.py` → `tox` / `nox` / `pytest`
+- `go.mod` → `go vet ./... && go test ./... && go build ./...`
+- `gradlew` / `build.gradle` → `./gradlew check`
+- `pom.xml` → `mvn verify`
+- nothing matches → leave a `<!-- TODO: your lint + build + test gate -->` placeholder.
+
+## 4. Detect base branch & conventions
+
+- Base branch: `git symbolic-ref refs/remotes/origin/HEAD` (fall back to whichever of `main` /
+  `master` exists).
+- Conventions: **detect the project's own rules before defaulting.** Read the commit/branch
+  guidance the project already states (`AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, a `.gitmessage`
+  template) and the shape of recent history (`git log --oneline -20`, the existing branch names);
+  adopt that commit-message style, branch-naming scheme, and language. Only when the project says
+  nothing, fall back to the engine defaults (Conventional Commits): commit & PR title
+  `feat(<ID>): …`, artifacts in the repo's language, no AI-tooling attribution; branch naming in
+  two forms — a **tracker-backed** roadmap uses `<type>/<ITEM-KEY>-<slug>` (`feat/`, `fix/`,
+  `chore/`, `refactor/`); a **slug-named** roadmap (no tracker — id derived per *Interpreting the
+  argument*) groups its items under the roadmap slug as `<type>/<roadmap-slug>/<item-slug>`. The
+  user adjusts at confirm.
+
+## 5. Detect canonical-doc candidates
+
+Look for stakeholder-substitute docs and offer a shortlist (don't invent): `docs/PRODUCT.md`,
+`ARCHITECTURE.md`, `CONTRIBUTING.md`, `README.md`, other `docs/*.md`.
+
+## 6. Confirm (the "+ confirm")
+
+Show a compact summary: the **resolved initiative id** (and that you'll write `roadmaps/<id>.md`),
+its source, its **branch target** (§6a), whether the shared base config already exists or you'll
+create it (and if so: code-host, verify, base branch, canonical docs), and the roadmap-file
+sections you'll leave as TODO (`## Queue`, `## Reserved decisions`). Let the user correct any field — especially
+the id. Do not write anything until they confirm.
+
+## 6a. Choose the branch target (mainline vs integration branch)
+
+Ask the user where this initiative's PRs land — **always ask; it's a runtime concern the repo
+can't reveal** (whether you'll run it concurrently with another roadmap is your call, not the
+repo's). Two options, default the first:
+
+- **Mainline (default).** The initiative branches, opens PRs, and merges against the repo's base
+  branch (§4) — the inherited `## Code-host binding`. Right for a roadmap that runs **alone**: no
+  extra branch, no `reconcile`. Choose this unless you'll run two roadmaps at once.
+- **Its own integration branch `integration/<id>`.** The initiative runs entirely on a dedicated
+  branch and reconciles to mainline once at completion. Choose this to run it **concurrently** with
+  another roadmap: each roadmap's serial merge queue then operates only on its own branch, so the
+  two can't collide on a shared mainline. This adds the `## Code-host binding` override and the
+  branch creation in §10. Note at confirm: once PRs are open against the integration branch this
+  isn't trivially reversible. See `docs/config-schema.md` → *Concurrent roadmaps and integration
+  branches*.
+
+## 7. Write the base plumbing *(only when `roadmap.config.md` is missing)*
+
+Assemble the shared base `roadmap.config.md` at the repo root — **plumbing only**, no
+`## Source binding` and no `## Queue` (those are the initiative's, written to the overlay in §10).
+Follow `examples/roadmap.config.example.md`'s section order:
+
+- **`## Code-host binding`** — paste the chosen binding's verb table verbatim from its file (copy,
+  don't re-summarize), substituting the detected branch/host, plus the code-host **conflict
+  protocol**.
+- **`## Verify`**, **`## Review ritual`**, **`## Conventions`**, **`## Canonical docs`** — fill
+  from the detections above.
+- Optional, project-wide: **`## Spec gate`** (with the "delete this section if you have no spec
+  requirement" note) and **`## Environment gotchas`** — add if they apply, else omit.
+
+If the base already exists, skip this step and reuse it untouched.
+
+## 8. Starter checklist (file-based source)
+
+The initiative's starter checklist is written **with the overlay, not the base** — see §10 step 6
+(`roadmaps/<id>.ROADMAP.md` for a Markdown/spec source, using the `- [ ] ID — title (deps: …)`
+shape from `examples/bindings/markdown.md`). Never overwrite an existing one.
+
+## 9. Report
+
+State the files written — the roadmap file `roadmaps/<id>.md` (and the base
+`roadmap.config.md` if you created it this run) — that they were **committed** (§11, not yet
+pushed), and the **branch target**: mainline, or — if an integration branch was chosen (§6a) —
+that `integration/<id>` was created and pushed, the initiative runs there, and a single
+`reconcile` merges it to mainline at mission-complete (solo/fleet keep it fresh by merging
+mainline forward meanwhile). Then what's left: fill the roadmap file's TODO sections
+(start with `## Queue`), optionally run the README dry-run to sanity-check selection, then run the
+initiative with `$autopilot-solo <id>` (single agent) or `$autopilot-fleet <id>` (parallel). Point
+to `docs/config-schema.md` for the full schema.
+
+## 10. Write the initiative overlay
+
+This is the point of the run, and it **always** happens — the base (from §§1, 3–5, 7) is now in
+place, freshly written or pre-existing. Reuse the base for everything project-wide; do not edit it.
+
+1. **Resolve the initiative id** per *Interpreting the argument* above — a tracker key used
+   verbatim, or a slug derived from the argument / conversation (kebab-case, confirmed). The
+   overlay path is `roadmaps/<id>.md`. If it already exists, **stop and report** — never overwrite
+   an overlay.
+2. **Read the base** `roadmap.config.md` to confirm the shared sections (`## Code-host binding`,
+   `## Verify`, `## Review ritual`, `## Conventions`) the overlay will inherit. The overlay does
+   **not** repeat them.
+3. **Pick the source binding for this initiative** (§2): use what the argument already stated, or
+   detect/ask. Each initiative may use a different source than the others.
+4. **Confirm** (the `plan` "+ confirm"): show the id, the roadmap-file path, the chosen source, the
+   **branch target** (§6a), and that host/verify/review/conventions are inherited from the base.
+   Do not write until confirmed.
+5. **Write `roadmaps/<ID>.md`** with only the overlay sections, following
+   `examples/roadmaps/TICKET-101.md`:
+   - `## Source binding` — paste the chosen source binding's verb table verbatim, substituting
+     this epic's ids.
+   - `## Queue` — a `<!-- TODO: dependency-ordered work for <ID> + fleet lane surfaces -->`
+     placeholder (only the owner can supply it).
+   - `## Reserved decisions` — `<!-- TODO: decisions reserved to a human for this epic -->`.
+   - `## Code-host binding` — **only when the branch target is an integration branch** (§6a).
+     Take the override block from `examples/roadmaps/TICKET-101.md` (the trailing commented
+     section) and fill it from the **detected host's** binding (`examples/bindings/github.md` →
+     *Integration branch*, or the `gitlab.md` equivalent): substitute the base-branch token with
+     `integration/<id>` in `branch` (`origin/integration/<id>`), `open-pr --base integration/<id>`,
+     `merge`, and include the `reconcile` row (final `integration/<id>` → mainline merge). On
+     **mainline** (the default), **omit this section** — the overlay inherits the base's binding.
+   - Optionally `## Canonical docs` / `## Spec gate` **only if** this epic overrides the base's;
+     otherwise omit them and inherit the base.
+6. **Markdown source only:** if the epic's source is the Markdown checklist, also write a starter
+   `roadmaps/<ID>.ROADMAP.md` (the `- [ ] ID — title (deps: …)` shape from
+   `examples/bindings/markdown.md`) and point the overlay's source binding at it. Never overwrite
+   an existing one.
+7. **Integration-branch target only:** create the branch so solo/fleet can branch off it. The
+   binding's `branch` verb expects `origin/integration/<id>` to exist, so `git fetch origin`,
+   create `integration/<id>` from the detected base branch (§4), and `git push -u origin
+   integration/<id>`. This is the **only** push `plan` performs — the scaffold commit itself stays
+   unpushed (§11). On the mainline target, do nothing here.
+   <!-- NOTE: one setup push only, in integration mode; if a sandbox ever forbids push, move
+        branch creation into the binding's `branch` verb (create-if-absent) instead. -->
+8. **Commit the scaffold** (§11), then **report** per §9.
+
+## 11. Commit the scaffold
+
+Scaffolding the roadmap is not done until it is committed. Uncommitted config is invisible to
+freshly-created helper workspaces (solo/fleet agents start from the committed base) and may be
+discarded when a workspace is cleaned up — so an uncommitted roadmap is silently lost. After writing the files
+in this run, stage and commit exactly them on the current branch:
+
+- The overlay `roadmaps/<id>.md` (and `roadmaps/<id>.ROADMAP.md` if written), plus
+  `roadmap.config.md` **only if** you created it this run.
+- `git add <those paths>` then commit — stage the paths explicitly, never `git add -A`, so you
+  commit only what plan wrote. **Phrase the message in the project's resolved `## Conventions`
+  commit style** (§4): with the engine default of Conventional Commits that's
+  `chore(roadmap): scaffold <id>` (or `chore(roadmap): set up base config + scaffold <id>` when
+  you created the base this run); a project with a different commit style gets the same intent
+  written its way. The message names the initiative by id and says "scaffold" — never the word
+  "overlay" (our internal term; see `autopilot-standards`). It is "scaffold `<id>`", not "scaffold
+  roadmap overlay".
+- Per `autopilot-standards` §5, `branch`/`commit` can lose an index-lock race — retry after a few
+  seconds. If the working tree had unrelated staged changes, leave them; only add plan's own paths.
+- Pushing is the owner's call; committing is what keeps the roadmap from being lost. Note in the
+  report (§9) that the scaffold was committed and is not yet pushed.
