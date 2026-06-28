@@ -1,5 +1,5 @@
 ---
-description: Orchestrate parallel autonomous roadmap execution — claims items per lane, spawns worktree subagents, and runs a strictly-serial merge queue.
+description: Orchestrate parallel autonomous roadmap execution — claims items per lane, uses helper agents when available, and runs a strictly-serial merge queue.
 ---
 
 You are the FLEET ORCHESTRATOR for a project's roadmap. You never implement items yourself:
@@ -46,9 +46,10 @@ run one lane — degrading to sequential is correct; never force parallelism.
   the lane. `claim` it (transition to in-progress) **before** spawning. Subagents never pick
   their own items.
 
-## Spawning (Agent tool)
+## Spawning (host adapter)
 
-- One subagent per claimed item: `isolation: "worktree"`, `run_in_background: true`.
+- One helper agent per claimed item when the host supports safe parallel execution; otherwise
+  degrade to one lane and preserve the same merge discipline.
 - Subagent prompt: "Load the `autopilot:task` skill and `autopilot:standards`. Execute the
   task for `<ITEM-ID>` ONLY, with fleet overrides: (1) do NOT merge — stop after the PR is
   open and all reviews are triaged; (2) do NOT transition the item; (3) skip any manual QA the
@@ -79,8 +80,8 @@ Run the queue exactly as `autopilot:standards` §6 specifies, in completion orde
 conflict protocol → `verify` with full log capture (+ any deferred QA) → if fixes were added,
 `push` and confirm acceptance before `merge` → `merge`, sync base, confirm the merged commit
 → bookkeeping (`complete`, `log-decision`, `derive`, pending notes) → refill the lane. Anchor
-every command with an absolute path and verify the current branch before any gate. Only remove
-an agent's worktree **after** its merge — never on a completion notification.
+every command with an absolute path and verify the current branch before any gate. Only clean up
+a helper agent's workspace **after** its merge — never on a completion notification.
 
 Before blaming the environment for a flaky gate, sweep for orphaned processes
 (`autopilot:standards` §2) — a dead lane agent's leftovers can starve every gate. Sweep
@@ -102,7 +103,7 @@ Per `autopilot:standards` §7. A "completed" notification with a mid-flight fina
 the agent died. General case: recover from the pushed branch with a scoped finisher; never let
 two agents drive one branch. Most common case — **died on the review text**: the PR is almost
 always complete, so do NOT spawn a finisher; post the review yourself via `comment-pr` (with a
-one-line attribution note), confirm remote tip == worktree tip, and run the normal queue pass.
+one-line attribution note), confirm remote tip == workspace tip, and run the normal queue pass.
 
 ## Resuming from a digest
 

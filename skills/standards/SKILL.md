@@ -130,9 +130,9 @@ These apply whenever a fleet runs agents in parallel against one repository.
   the base branch, and the gate then "passes" on the base instead of your work.
 - **Commit early, push early.** If you crash, recovery starts from the pushed branch.
   Work-in-progress commits are fine; they get squashed at merge.
-- **Worktrees change tool context.** Directory-named tooling (compose projects, caches)
-  resolves differently inside a worktree. Run such commands from the real repository root or
-  pass an explicit project/path. The shell's working directory dies with a removed worktree —
+- **Isolated checkouts change tool context.** Directory-named tooling (compose projects, caches)
+  resolves differently inside a helper workspace. Run such commands from the real repository root or
+  pass an explicit project/path. The shell's working directory can disappear after cleanup —
   anchor every command with an absolute path.
 
 ## 6. The strictly-serial merge queue (fleet only)
@@ -152,9 +152,9 @@ branch and never interact. For each ready PR:
 3. If the queue added fix commits: **`push` and confirm acceptance** (remote tip == local
    tip) *before* `merge`. A rejected push plus a squash-merge silently drops the fixes.
 4. **`merge`**, then sync the base and confirm the merged commit actually contains what you
-   think it does when fixes were involved. **Only now** remove the agent's worktree and local
-   branch — never on a completion notification, which can fire while the agent is still
-   reviving; removing a live agent's worktree kills it.
+   think it does when fixes were involved. **Only now** clean up the helper agent's workspace and
+   local branch — never on a completion notification, which can fire while the agent is still
+   reviving; deleting a live helper workspace kills it.
 5. **Bookkeeping:** `complete` the task, post its decision lines via `log-decision`, `derive`
    any follow-up work, post pending-human notes.
 6. **Refill the lane:** `claim` the next fitting task and spawn.
@@ -167,7 +167,7 @@ lane.
 Agents die ending their turn on a background gate or on review text.
 
 - **General case:** a "completed" notification whose final message is mid-flight means the
-  agent died. Inspect its worktree, commit+push any state as WIP, and spawn a **finisher**
+  agent died. Inspect its workspace, commit+push any state as WIP, and spawn a **finisher**
   scoped to the remaining steps (verify → reviews-posted-on-PR → open-pr → report). Never
   reimplement; never let two agents drive one branch — the finisher owns it, and later ghost
   revivals of the dead agent are read-only echoes.
@@ -175,8 +175,8 @@ Agents die ending their turn on a background gate or on review text.
   instead of the report. The PR is almost always complete (branch pushed, earlier reviews
   posted) — only this review comment and the report are missing. Do **not** spawn a finisher:
   the orchestrator posts the review from the agent's result via `comment-pr` (with a one-line
-  attribution note), confirms remote tip == worktree tip, and runs the normal queue pass.
-  Diagnose by reading the PR's comments and the worktree before assuming anything is missing.
+  attribution note), confirms remote tip == workspace tip, and runs the normal queue pass.
+  Diagnose by reading the PR's comments and the workspace before assuming anything is missing.
 
 ## 8. Cost policy (fleet only)
 

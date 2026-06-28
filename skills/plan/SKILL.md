@@ -260,8 +260,8 @@ place, freshly written or pre-existing. Reuse the base for everything project-wi
 ## 11. Commit the scaffold
 
 Scaffolding the roadmap is not done until it is committed. Uncommitted config is invisible to
-freshly-branched worktrees (solo/fleet subagents branch off the committed base) and is discarded
-when a worktree is removed — so an uncommitted roadmap is silently lost. After writing the files
+freshly-created helper workspaces (solo/fleet agents start from the committed base) and may be
+discarded when a workspace is cleaned up — so an uncommitted roadmap is silently lost. After writing the files
 in this run, stage and commit exactly them on the current branch:
 
 - The overlay `roadmaps/<id>.md` (and `roadmaps/<id>.ROADMAP.md` if written), plus

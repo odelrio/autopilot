@@ -41,7 +41,5 @@ State here how the rebase-before-merge resolves collisions. Typical rules:
 
 - Confirm acceptance after every `push` (remote tip == local tip). A rejected non-fast-forward
   push followed by a squash-merge silently drops commits.
-- If your environment denies force-push from the main checkout but allows it from agent
-  worktrees, operate the merge queue inside the agent's worktree when a rewrite-push is
-  expected; otherwise use the merge-commit route (reset to remote, merge base, resolve, plain
-  push) instead of retrying a denied force-push.
+- If your environment denies force-push from the main checkout, use the merge-commit route
+  (reset to remote, merge base, resolve, plain push) instead of retrying a denied force-push.
