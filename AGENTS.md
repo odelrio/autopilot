@@ -5,11 +5,12 @@ this repository.
 
 ## What this is
 
-A Claude Code plugin — a **pure-Markdown engine** with no build system, no package manager,
-and no test runner. Every component is a `.md` file loaded by the agent host at runtime. There
-is nothing to compile and no dependencies to install.
+A **host-agnostic roadmap plugin** — a **pure-Markdown engine** with no build system, no
+package manager, and no test runner. Every component is a `.md` file loaded by the agent host
+at runtime. There is nothing to compile and no dependencies to install. Claude Code is the
+native host; Codex and OpenCode adapters are available under `adapters/`.
 
-## Running locally
+## Running locally (Claude Code — the native host)
 
 ```
 claude --plugin-dir .
@@ -17,6 +18,8 @@ claude --plugin-dir .
 
 Confirm it loaded: `/help` should list `/autopilot:plan`, `/autopilot:solo`, and
 `/autopilot:fleet`, and the `autopilot:task` / `autopilot:standards` skills should be available.
+
+See `docs/adapters/` for running with Codex or OpenCode.
 
 ## Architecture
 
@@ -31,13 +34,16 @@ Project config            roadmap.config.md (base plumbing)  +  roadmaps/<id>.md
 Your repository           the roadmap actually gets executed
 ```
 
+The engine is **host-agnostic** — the same core instructions run on Claude Code (native),
+Codex, and OpenCode via host adapters under `adapters/`. See `docs/adapters/`.
+
 ### Components and their roles
 
 | File | Invocation | Role |
 |------|-----------|------|
 | `commands/plan.md` + `skills/plan/SKILL.md` | `/autopilot:plan` | Setup layer: autodetect the stack and scaffold the consumer's `roadmap.config.md` (the one interactive command) |
 | `commands/solo.md` | `/autopilot:solo` | Single-agent: works items one at a time until a stop condition |
-| `commands/fleet.md` | `/autopilot:fleet` | Orchestrator: claims per lane, spawns worktree subagents, runs serial merge queue |
+| `commands/fleet.md` | `/autopilot:fleet` | Orchestrator: claims per lane, uses helper agents when the host supports them, runs serial merge queue |
 | `skills/task/SKILL.md` | `autopilot:task` | One roadmap item end-to-end (pick → spec gate → implement → verify → review → PR → merge → bookkeeping) |
 | `skills/standards/SKILL.md` | `autopilot:standards` | Discipline layer: survival rules, merge protocol, crash recovery, communication contract |
 
@@ -98,7 +104,7 @@ Pre-built binding snippets live in `examples/bindings/` — paste and adjust:
   **setup layer** (`commands/plan.md` + `skills/plan/`), which by design inspects the repo and
   names tools to scaffold that config.
 - `skills/task` drives one item; the fleet orchestrator drives the merge queue. This separation
-  is load-bearing: fleet subagents do **not** merge — they stop after PR open and triage; the
+  is load-bearing: fleet helper agents do **not** merge — they stop after PR open and triage; the
   orchestrator's serial merge queue handles everything else.
 - The base ⊕ overlay split is section-level override, never a deep merge: an overlay section
   replaces the base section of the same name. The base is **plumbing only** — `## Source binding`

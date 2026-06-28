@@ -1,6 +1,8 @@
 # autopilot
 
-A Claude Code plugin: a **generic engine for autonomous roadmap execution**. It ships a
+A **roadmap plugin for autonomous engineering work** — a generic engine that reads a project's
+roadmap config and drives work items end-to-end across agent hosts. Claude Code is the
+native host; Codex and OpenCode adapters are available. It ships a
 single-agent executor and a parallel fleet orchestrator, both backed by a strictly-serial
 merge queue, crash recovery, and a layer of survival rules earned the hard way running long
 unattended sessions.
@@ -12,11 +14,13 @@ gate). Nothing about your stack lives in the engine — it lives in your config.
 ## Three layers
 
 ```
-Engine (this plugin)      commands/solo · commands/fleet · skills/task · skills/standards
-   │  speaks abstract verbs only
-Project config            roadmap.config.md  +  bindings  (examples/ has copyable templates)
+Autopilot core          roadmap protocol, commands, skills, standards
+   │  speaks abstract verbs only; host-agnostic
+Host adapter            Claude Code (native) / Codex / OpenCode — installation and invocation shape
+   │  packages core instructions for the host
+Project config          roadmap.config.md + roadmaps/<id>.md source/code-host bindings
    │  resolves verbs → real tools
-Your repository           the roadmap actually gets executed
+Your repository         the roadmap actually gets executed
 ```
 
 ## The verb contract
@@ -33,7 +37,7 @@ The engine never names a provider. Your config resolves these:
 | ----------------------- | --------------------- | ---------------------------------------------------------- |
 | `commands/plan.md`      | `/autopilot:plan`     | Scaffold your `roadmap.config.md` (the one interactive command). |
 | `commands/solo.md`      | `/autopilot:solo`     | Single-agent: works the queue one item at a time.          |
-| `commands/fleet.md`     | `/autopilot:fleet`    | Orchestrator: lanes, worktree subagents, serial merge queue.|
+| `commands/fleet.md`     | `/autopilot:fleet`    | Orchestrator: lanes, helper agents, serial merge queue.     |
 | `skills/task/`          | `autopilot:task`      | One roadmap item end-to-end.                               |
 | `skills/standards/`     | `autopilot:standards` | The discipline layer every component references.           |
 
@@ -51,8 +55,22 @@ From the marketplace:
 Confirm it loaded: `/help` should list `/autopilot:plan`, `/autopilot:solo`, and
 `/autopilot:fleet`.
 
+Claude Code is the native host. See `docs/adapters/` for Codex and OpenCode installation.
+
 > Developing the plugin itself? Run it from a clone without installing: `claude --plugin-dir .`
 > from the repo root.
+
+## Agent hosts
+
+Autopilot is host-agnostic. The same roadmap engine runs on multiple agent hosts:
+
+| Host | Status | Installation |
+|------|--------|-------------|
+| **Claude Code** | Native | `/plugin marketplace add odelrio/autopilot` — see `docs/adapters/claude-code.md` |
+| **Codex** | Adapter | Skill-based — see `docs/adapters/codex.md` |
+| **OpenCode** | Adapter | Skill + command — see `docs/adapters/opencode.md` |
+
+Each host adapter documents installation, invocation, and host-specific capabilities.
 
 ## Quickstart
 
@@ -77,8 +95,8 @@ Confirm it loaded: `/help` should list `/autopilot:plan`, `/autopilot:solo`, and
 3. **Run the initiative.**
    - **Single agent:** `/autopilot:solo <id>` — works the queue one item at a time, posting one
      line per item, until a stop condition.
-   - **Parallel:** `/autopilot:fleet <id>` — claims one item per lane, spawns a worktree subagent
-     for each, and merges through a strictly-serial queue.
+   - **Parallel:** `/autopilot:fleet <id>` — claims one item per lane, uses the host adapter's
+     helper-agent model for each, and merges through a strictly-serial queue.
    - **Unattended to completion:** launch either on a loop. It ends itself at mission
      complete and does not reschedule.
 
@@ -182,7 +200,7 @@ deciding under ambiguity — and cannot be mechanized; they stay as prose. But a
 **mechanical** (a binary pass/fail) and benefit from deterministic enforcement via Claude Code
 hooks.
 
-Those hooks do **not** live in this engine. A hook is a shell command bound to a real tool
+Those hooks do **not** live in this engine. (Hooks are a Claude Code feature. See host-specific adapter docs for equivalent mechanisms on other hosts.) A hook is a shell command bound to a real tool
 (`git`, `gh`), and baking tool names into the engine would break the very abstraction the verb
 contract protects. They belong in **your** repository's `.claude/settings.json`, alongside
 your bindings — the project layer that already knows your tools. Good candidates, all straight
