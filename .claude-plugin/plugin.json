@@ -1,7 +1,7 @@
 {
   "name": "autopilot",
   "description": "Generic engine for autonomous roadmap execution: a single-agent executor and a parallel fleet orchestrator with a strictly-serial merge queue, crash recovery, and battle-tested survival rules. Project-agnostic; bound to your tools via a roadmap.config.md.",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "author": {
     "name": "Oriol del Rio",
     "email": "contact@odelrio.com"
