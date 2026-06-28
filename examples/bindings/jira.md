@@ -9,8 +9,8 @@ double as the decision log.
 
 | Verb           | Command                                                                                              |
 | -------------- | --------------------------------------------------------------------------------------------------- |
-| `next-ready`   | Read the `## Queue` order in `roadmap.config.md`; cross-check status with `acli jira workitem list --jql "parent = <EPIC> AND status = 'To Do'"`; pick the first whose dependencies are all `Done`. |
-| `list-open`    | `acli jira workitem list --jql "parent = <EPIC> AND statusCategory != Done"` — every open item under the epic, for the drift check (not filtered by the queue). |
+| `next-ready`   | Read the `## Queue` order in `roadmap.config.md`; cross-check status with `acli jira workitem search --jql "parent = <EPIC> AND status = 'To Do'"`; pick the first whose dependencies are all `Done`. |
+| `list-open`    | `acli jira workitem search --jql "parent = <EPIC> AND statusCategory != Done"` — every open item under the epic, for the drift check (not filtered by the queue). |
 | `claim`        | `acli jira workitem transition --key <KEY> --status "In Progress"`                                   |
 | `complete`     | `acli jira workitem transition --key <KEY> --status "Done"`                                          |
 | `park`         | `acli jira workitem transition --key <KEY> --status "To Do"` + a `note` explaining why.              |

@@ -1,6 +1,6 @@
 ---
-name: plan
-description: Plan a roadmap initiative. Sets up the project's shared base (code host, build gate, conventions) the first time, then scaffolds the initiative as its own roadmap file (its own source + queue) — autodetecting and confirming before writing, including whether the initiative runs on mainline or its own integration branch. The one interactive autopilot command; solo and fleet never ask.
+name: autopilot-plan
+description: OpenCode adapter — plan a roadmap initiative. Sets up the project shared base (code host, build gate, conventions) the first time, then scaffolds the initiative as its own roadmap file (its own source + queue) — autodetecting and confirming before writing, including whether the initiative runs on mainline or its own integration branch. The one interactive autopilot command; solo and fleet never ask.
 ---
 
 # Autopilot plan
@@ -15,14 +15,14 @@ plumbing that plan establishes **once** and every later initiative reuses.
 `plan` is interactive, so you *do* address the user — but only with: the questions you must ask
 (§§1–6a), the **confirm** summary (§6), and the final **report** (§9). Don't narrate your reads,
 detections, or step-by-step reasoning ("let me read the existing overlays…", "this maps cleanly
-onto…"). That play-by-play is exactly `autopilot:standards` §4's "don't plan aloud" — it applies
+onto…"). That play-by-play is exactly `autopilot-standards` §4's "don't plan aloud" — it applies
 here too; the user wants the questions and the result, not the deliberation.
 
 Speak the **consumer's** vocabulary. The unit of work is an **initiative** — a **roadmap file**
 (`roadmaps/<id>.md`). "Overlay", "base/plumbing", "binding/verb table", "lane/wave" are *our*
 internal words; keep them in your head, never in anything the user reads (questions, confirm,
 report, commit messages, PRs). Say the initiative by id or "the roadmap" — never "the overlay".
-Same rule, verbatim, as `autopilot:standards` §4 — `plan` doesn't load `standards`, so it is
+Same rule, verbatim, as `autopilot-standards` §4 — `plan` doesn't load `standards`, so it is
 restated here.
 
 ## What plan does
@@ -39,23 +39,23 @@ single roadmap — the engine reads it — but new initiatives scaffold as overl
 
 ## Interpreting the argument
 
-`/autopilot:plan [argument]` takes a **free-form** argument describing the initiative — *the more
+`/autopilot-plan [argument]` takes a **free-form** argument describing the initiative — *the more
 you say, the fewer questions plan asks*. It infers the rest from the repo and this conversation,
 and **always proposes what it resolved and confirms before writing** (never names a file from a
 guess). The spectrum:
 
-- **Nothing** (`/autopilot:plan`) — infer the initiative from the conversation; confirm it, or ask
+- **Nothing** (`/autopilot-plan`) — infer the initiative from the conversation; confirm it, or ask
   what you can't tell. With no argument *and* no discernible intent (and a base already present),
   stop and report rather than guess.
-- **A tracker key** (`/autopilot:plan TICKET-101`) — a tracker-backed initiative. Infer *which*
+- **A tracker key** (`/autopilot-plan TICKET-101`) — a tracker-backed initiative. Infer *which*
   tracker from the repo (Jira / GitHub Issues / GitLab) and confirm; use the key verbatim as the
   overlay id and as the key the source binding substitutes.
-- **Free-text intent** (`/autopilot:plan redesign the onboarding flow`) — distill it into a short,
+- **Free-text intent** (`/autopilot-plan redesign the onboarding flow`) — distill it into a short,
   lowercase, kebab-case slug (`onboarding-redesign`; 2–4 words, ASCII, no ticket prefix) as the
   overlay id, and start planning the initiative. A slug-named initiative has no tracker, so its
   source is a file-based one (Markdown checklist, spec files) and its items carry no tracker keys —
   which changes branch naming (see §4).
-- **A source description** (`/autopilot:plan work items are subtasks of Jira epic TICKET-101 via
+- **A source description** (`/autopilot-plan work items are subtasks of Jira epic TICKET-101 via
   acli; the epic's comments are the log`, or `… the change specs under openspec/changes/, one item
   per change folder`) — the tracker/intent case **plus** a pre-stated source, so plan skips §2's
   questions and fills the binding directly. Derive the overlay id from the key or the intent in
@@ -65,20 +65,23 @@ This is the **only** interactive, human-in-the-loop autopilot command, and the *
 besides `examples/bindings/` where naming real tools (`git`, `gh`, `glab`, `make`, …) is
 sanctioned: `plan` is the setup layer that *produces* the project's binding config by inspecting
 the repo, not the runtime engine (`solo`/`fleet`/`task`/`standards`), which stays tool-agnostic.
-`/autopilot:solo` and `/autopilot:fleet` never ask the user anything; `plan` is setup-time and
+`$autopilot-solo` and `$autopilot-fleet` never ask the user anything; `plan` is setup-time and
 explicitly does. Detect what you can, ask for the rest, and **always confirm before writing**.
 
 ## Locating the bundled templates
 
-You materialize the project config from the plugin's own packaged files. They live under this
-skill's plugin root, **not** in the user's repository, and the install path is versioned (it
-changes on every plugin update) — never hardcode it.
+You materialize the project config from Autopilot's packaged examples. In the OpenCode adapter,
+the install instructions copy those examples into an adapter support directory next to the
+installed skills and commands — not into the consuming project's source tree.
 
-- Resolve the plugin root from this skill's **base directory** (the absolute path the harness
-  gives you when it loads this skill): `examples/` is two levels up, at `<base-dir>/../../examples/`.
-- Fallback: the `${CLAUDE_PLUGIN_ROOT}` environment variable points at the same plugin root, so
-  `${CLAUDE_PLUGIN_ROOT}/examples/` also works (try it via Bash if the base-dir path doesn't
-  resolve).
+- Preferred path: resolve this skill's own directory, then read templates from
+  `../../autopilot/examples/` relative to it. With the documented repo-local install, that is
+  `.opencode/autopilot/examples/`; with the documented global install, that is
+  `~/.config/opencode/autopilot/examples/`.
+- Development fallback: when running from the Autopilot checkout itself, use the repository's
+  `examples/` directory.
+- If neither path exists, stop and report that the adapter support examples were not installed;
+  do not invent a config from memory.
 
 The files you read (sources of truth — never edit them, only copy from them):
 
@@ -208,7 +211,7 @@ that `integration/<id>` was created and pushed, the initiative runs there, and a
 `reconcile` merges it to mainline at mission-complete (solo/fleet keep it fresh by merging
 mainline forward meanwhile). Then what's left: fill the roadmap file's TODO sections
 (start with `## Queue`), optionally run the README dry-run to sanity-check selection, then run the
-initiative with `/autopilot:solo <id>` (single agent) or `/autopilot:fleet <id>` (parallel). Point
+initiative with `$autopilot-solo <id>` (single agent) or `$autopilot-fleet <id>` (parallel). Point
 to `docs/config-schema.md` for the full schema.
 
 ## 10. Write the initiative overlay
@@ -272,9 +275,9 @@ in this run, stage and commit exactly them on the current branch:
   `chore(roadmap): scaffold <id>` (or `chore(roadmap): set up base config + scaffold <id>` when
   you created the base this run); a project with a different commit style gets the same intent
   written its way. The message names the initiative by id and says "scaffold" — never the word
-  "overlay" (our internal term; see `autopilot:standards`). It is "scaffold `<id>`", not "scaffold
+  "overlay" (our internal term; see `autopilot-standards`). It is "scaffold `<id>`", not "scaffold
   roadmap overlay".
-- Per `autopilot:standards` §5, `branch`/`commit` can lose an index-lock race — retry after a few
+- Per `autopilot-standards` §5, `branch`/`commit` can lose an index-lock race — retry after a few
   seconds. If the working tree had unrelated staged changes, leave them; only add plan's own paths.
 - Pushing is the owner's call; committing is what keeps the roadmap from being lost. Note in the
   report (§9) that the scaffold was committed and is not yet pushed.

@@ -1,6 +1,6 @@
 ---
-name: standards
-description: The discipline layer for autonomous roadmap execution — survival rules, verification gates, the strictly-serial merge protocol, crash recovery, and the communication contract. Load this whenever running autopilot:task, /autopilot:solo, or /autopilot:fleet; every other autopilot component references it instead of restating it.
+name: autopilot-standards
+description: "Codex adapter — the discipline layer for autonomous roadmap execution: survival rules, verification gates, the strictly-serial merge protocol, crash recovery, and the communication contract. Load this whenever running autopilot-task, $autopilot-solo, or $autopilot-fleet; every other autopilot component references it instead of restating it."
 ---
 
 # Autopilot standards
